@@ -19,6 +19,8 @@ body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
 img{max-width:100%}
 [hidden]{display:none!important}
 </style>
+<script>window.firebaseReady = new Promise(r => { window.__resolveFirebase = r; });</script>
+<script src="firebase-config.js"></script>
 </head>
 <body>
 <title>Programme des réunions</title>
@@ -438,12 +440,15 @@ function removeDoc(col, id){
 function syncStatus(){
   const dot = $('#syncDot'), t = $('#syncTxt');
   const pend = saving > 0 || Object.values(queue).some(e => e.data || e.del);
-  if (S.mode === 'db') { dot.className = 'dot ' + (pend ? 'warn' : 'ok'); t.textContent = pend ? 'Enregistrement…' : (S.canWrite ? 'Enregistré en ligne' : 'Lecture seule'); }
+  if (S.mode === 'db' && navigator.onLine === false) { dot.className = 'dot warn'; t.textContent = 'Hors ligne · envoi au retour de la connexion'; }
+  else if (S.mode === 'db') { dot.className = 'dot ' + (pend ? 'warn' : 'ok'); t.textContent = pend ? 'Enregistrement…' : (S.canWrite ? 'Enregistré en ligne' : 'Lecture seule'); }
   else if (S.mode === 'local') { dot.className = 'dot warn'; t.textContent = 'Enregistré sur cet appareil seulement'; }
   else { dot.className = 'dot'; t.textContent = 'Connexion…'; }
 }
 
 const MIME = { pdf: 'application/pdf', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', json: 'application/json' };
+window.addEventListener('online', () => syncStatus());
+window.addEventListener('offline', () => syncStatus());
 async function boot(){
   let usedb = null, user = null;
   /* Hors de Claude (application installée) : téléchargement classique du navigateur */
@@ -453,8 +458,11 @@ async function boot(){
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000); return { status: 'saved' }; } };
   try { if (window.claude && window.claude.use) window.claude.use('downloads').then(d => { DL = d; if (d) scheduleRender(); }).catch(() => {}); } catch {}
   try { if (window.claude && window.claude.use) [usedb, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]); } catch {}
+  /* Application installée : base de données en ligne Firebase (si elle est configurée) */
+  if (!usedb && window.firebaseReady) { try { usedb = await window.firebaseReady; } catch { usedb = null; } }
   if (!usedb) { S.mode = 'local'; loadLocal(); syncStatus(); render(); return; }
   db = usedb; S.mode = 'db';
+  if (usedb.canWrite === false) S.canWrite = false;
   try { if (user && user.can) { const w = await user.can('data.write'); if (w === false) S.canWrite = false; } } catch {}
   syncStatus();
   const slow = setTimeout(() => { if (S.loaded.size < 5) { $('#syncTxt').textContent = 'Données pas encore joignables…'; } }, 10000);
@@ -952,6 +960,7 @@ function settingsDialog(){
       <label class="toggle wide"><input type="checkbox" id="cf-aux"${c.aux ? ' checked' : ''}> Classe auxiliaire (deuxième salle pour les exposés)</label>
       <label class="toggle wide"><input type="checkbox" id="cf-beep"${lsGet('vcm-beep') !== false ? ' checked' : ''}> Bip sonore quand le temps d’une partie est écoulé</label>
       ${nEx ? `<div class="wide banner" style="margin:0"><span>${nEx} élément(s) d’exemple sont affichés pour la démonstration.</span><span class="spacer"></span><button type="button" class="btn sm danger" id="cf-ex">Supprimer les exemples</button></div>` : ''}
+      <div class="wide" id="cf-extra" hidden></div>
       <fieldset class="wide"><legend>Sauvegarde</legend>
         <div class="row">${DL ? `<button type="button" class="btn sm" id="cf-backup">${I.dl}Télécharger une sauvegarde</button>` : ''}
           <label class="btn sm" for="cf-file">Restaurer une sauvegarde</label><input type="file" id="cf-file" accept=".json,application/json" hidden></div>
@@ -980,6 +989,7 @@ function settingsDialog(){
   };
   d.onclose = () => render();
   d.showModal();
+  if (window.onSettingsOpen) { const x = $('#cf-extra'); x.hidden = false; try { window.onSettingsOpen(x); } catch {} }
 }
 
 /* ----- Copier ----- */
@@ -1468,6 +1478,7 @@ render();
 boot();
 </script>
 
+<script type="module" src="firebase-sync.js" onerror="window.__resolveFirebase(null)"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
