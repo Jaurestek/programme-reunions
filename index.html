@@ -1,0 +1,1477 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Programme des réunions de semaine et du week-end : attributions, orateurs, chronomètre, fiches S-89.">
+<meta name="theme-color" content="#1f5e58">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-48.png" sizes="48x48" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Réunions">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<title>Programme des réunions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout : barre d'en-tête + onglets (en bas sur téléphone), contenu en une colonne lisible, bandes de couleur par section du cahier */
+:root{
+  --paper:#f4f6f3; --card:#ffffff; --ink:#1c2422; --muted:#5b6762; --line:#dce2dd; --soft:#eaefeb;
+  --accent:#1f5e58; --accent-ink:#ffffff;
+  --joyaux:#3d6c78; --ministere:#a97716; --vie:#8a2a2a;
+  --ok:#2c7a4b; --warn:#b06d10; --bad:#b3261e;
+  --f-display:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#111615; --card:#192120; --ink:#e6ebe9; --muted:#9aa8a3; --line:#2a3432; --soft:#212a28;
+  --accent:#73b8ae; --accent-ink:#0d1716;
+  --joyaux:#86b6c2; --ministere:#e2b552; --vie:#e48e88;
+  --ok:#6cc58f; --warn:#e7a948; --bad:#f08a80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#111615; --card:#192120; --ink:#e6ebe9; --muted:#9aa8a3; --line:#2a3432; --soft:#212a28;
+  --accent:#73b8ae; --accent-ink:#0d1716;
+  --joyaux:#86b6c2; --ministere:#e2b552; --vie:#e48e88;
+  --ok:#6cc58f; --warn:#e7a948; --bad:#f08a80; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--card)}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* En-tête */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--card);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.brand{display:flex;flex-direction:column;min-width:0;flex:1}
+.brand b{font-family:var(--f-display);font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{color:var(--muted);font-size:12px;display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
+.dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)}
+nav.tabs{display:flex;gap:2px}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:700}
+nav.tabs a svg{width:20px;height:20px}
+nav.tabs a[aria-current="page"]{color:var(--accent);background:var(--soft)}
+@media (max-width:720px){
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--card);border-top:1px solid var(--line);justify-content:space-around;
+    padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  nav.tabs a{flex:1;padding:6px 2px;font-size:11.5px}
+  main{padding-bottom:84px}
+}
+main{padding-block:18px 40px}
+
+/* Boutons */
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:5px 9px;font-size:13px}
+.btn svg{width:16px;height:16px;flex:none}
+.icon-btn{border:0;background:transparent;padding:6px;border-radius:6px;cursor:pointer;color:var(--muted);display:inline-flex}
+.icon-btn:hover{background:var(--soft);color:var(--ink)}
+.icon-btn svg{width:18px;height:18px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+.muted{color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;letter-spacing:.02em;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.chip.acc{color:var(--accent)} .chip.warn{color:var(--warn)} .chip.ex{border:1px dashed var(--muted);background:transparent}
+
+/* Champs */
+label.fld{display:flex;flex-direction:column;gap:3px;min-width:0}
+label.fld>span{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+input[type=text],input[type=number],input[type=tel],input[type=month],input[type=time],input[type=search],select,textarea{
+  width:100%;min-width:0;border:1px solid var(--line);background:var(--card);border-radius:7px;padding:7px 9px;font-size:14.5px}
+select.unset{color:var(--muted)}
+select.dup{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn) inset}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
+input.num{width:64px;text-align:center;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Semaine */
+.weekhead{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+.weeknav{display:flex;align-items:center;gap:6px}
+.weeknav h1{font-size:24px}
+.weeknav .sub{color:var(--muted);font-size:13.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding:14px}
+.section{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.section>h2{font-family:var(--f-body);font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:#fff;padding:9px 14px;display:flex;align-items:center;gap:10px}
+.section.joyaux>h2{background:var(--joyaux)} .section.ministere>h2{background:var(--ministere)} .section.vie>h2{background:var(--vie)}
+.section.neutral>h2{background:var(--soft);color:var(--ink)}
+:root[data-theme="dark"] .section:not(.neutral)>h2{color:#111615}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .section:not(.neutral)>h2{color:#111615}}
+.section>h2 .chip{margin-left:auto;background:rgba(255,255,255,.2);color:inherit}
+.parts{list-style:none;margin:0;padding:0}
+.part{display:grid;grid-template-columns:30px 1fr;gap:4px 10px;padding:12px 14px;border-top:1px solid var(--line)}
+.part:first-child{border-top:0}
+.part .n{font-family:var(--f-mono);font-weight:700;font-size:15px;padding-top:7px;color:var(--muted)}
+.section.joyaux .n{color:var(--joyaux)} .section.ministere .n{color:var(--ministere)} .section.vie .n{color:var(--vie)}
+.part-main{display:flex;flex-direction:column;gap:8px;min-width:0}
+.part-title{display:flex;gap:8px;align-items:center}
+.part-title input[type=text]{font-weight:700}
+.minlab{display:flex;align-items:center;gap:4px;color:var(--muted);font-size:13px}
+.assign{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.aux-row{border-top:1px dashed var(--line);padding-top:8px}
+.add-part{padding:10px 14px;border-top:1px solid var(--line)}
+.fixed-line{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:12px 14px;border-top:1px solid var(--line);align-items:center}
+.fixed-line .inner{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;align-items:end}
+.fixed-line .lbl{font-weight:700}
+.empty{padding:28px 20px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.empty h2{font-size:20px}
+.empty p{margin:0;color:var(--muted);max-width:46ch}
+.banner{padding:12px 14px;border-radius:var(--r);background:var(--soft);display:flex;gap:10px;align-items:center;margin-top:14px}
+
+/* Personnes */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar h1{font-size:24px;margin-right:auto}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.filters button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)}
+.filters button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line);cursor:pointer}
+.list li:first-child{border-top:0}
+.list li:hover{background:var(--soft)}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none;background:var(--soft);color:var(--accent)}
+.avatar.f{color:var(--vie)}
+.who{flex:1;min-width:0}
+.who b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .row{gap:4px;margin-top:3px}
+.last{font-size:12.5px;color:var(--muted);text-align:right;white-space:nowrap}
+.count{color:var(--muted);font-size:13px;margin-bottom:8px}
+
+/* Week-end */
+.period{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:7px 12px;font-weight:700;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.month-h{font-family:var(--f-display);font-size:17px;margin:20px 0 8px;text-transform:capitalize}
+details.we{border-top:1px solid var(--line)}
+details.we:first-child{border-top:0}
+details.we summary{list-style:none;display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:11px 14px;cursor:pointer}
+details.we summary::-webkit-details-marker{display:none}
+.datebox{text-align:center;border:1px solid var(--line);border-radius:8px;padding:3px 0;line-height:1.1}
+.datebox b{display:block;font-family:var(--f-mono);font-size:19px}
+.datebox small{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.we-sum{min-width:0}
+.we-sum .theme{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.we-sum .theme .no{font-family:var(--f-mono);color:var(--accent);margin-right:6px}
+.we-sum .sp{color:var(--muted);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.we-body{padding:4px 14px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.we-body .wide{grid-column:1/-1}
+.we-body .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.todo{color:var(--warn)}
+
+/* Dialogues */
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 40px)}
+dialog::backdrop{background:rgba(10,16,15,.5)}
+dialog form{display:flex;flex-direction:column;max-height:calc(100dvh - 42px)}
+.dlg-h{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.dlg-h h2{font-size:19px;flex:1}
+.dlg-b{padding:16px 18px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dlg-b .wide{grid-column:1/-1}
+.dlg-f{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 12px}
+.checks label{display:flex;gap:8px;align-items:center;font-size:14px;padding:3px 0}
+.checks input,.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.toggle{display:flex;gap:8px;align-items:center}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+legend{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;padding:0}
+@media (max-width:520px){.dlg-b{grid-template-columns:1fr}}
+
+/* Chronomètre */
+.timer{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;flex-direction:column;
+  padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.timer-h{display:flex;align-items:center;gap:10px}
+.timer-h h2{font-size:17px;flex:1}
+.timer-body{flex:1;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;min-height:0;margin-top:12px}
+@media (max-width:760px){.timer-body{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}}
+.clock{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;text-align:center;border-radius:16px;background:var(--card);border:1px solid var(--line);padding:18px;position:relative;overflow:hidden}
+.clock .sec-tag{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.clock .ptitle{font-family:var(--f-display);font-size:clamp(19px,3.4vw,28px);font-weight:700}
+.clock .pwho{color:var(--muted);font-size:16px}
+.digits{font-family:var(--f-mono);font-weight:700;font-variant-numeric:tabular-nums;font-size:clamp(64px,15vw,150px);line-height:1;letter-spacing:-.02em}
+.remain{font-family:var(--f-mono);font-size:18px;font-weight:700}
+.bar{width:100%;max-width:520px;height:10px;border-radius:99px;background:var(--soft);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .25s linear}
+.clock.amber .digits,.clock.amber .remain{color:var(--warn)} .clock.amber .bar i{background:var(--warn)}
+.clock.over .digits,.clock.over .remain{color:var(--bad)} .clock.over .bar i{background:var(--bad)}
+.clock.over{border-color:var(--bad)}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ctrl .btn{padding:12px 18px;font-size:16px}
+.tlist{overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:16px;min-height:0}
+.tlist ol{list-style:none;margin:0;padding:0}
+.tlist li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:9px 14px;border-top:1px solid var(--line);cursor:pointer;border-left:4px solid transparent}
+.tlist li:first-child{border-top:0}
+.tlist li.cur{background:var(--soft);border-left-color:var(--accent)}
+.tlist li .t{font-weight:700;font-size:14px}
+.tlist li .w{color:var(--muted);font-size:12.5px;grid-column:1}
+.tlist li .d{font-family:var(--f-mono);font-size:13px;text-align:right;grid-row:1/3;grid-column:2;align-self:center;font-variant-numeric:tabular-nums}
+.tlist li .d .late{color:var(--bad)} .tlist li .d .fine{color:var(--ok)}
+.tlist li.s-joyaux{border-left-color:color-mix(in srgb,var(--joyaux) 45%,transparent)}
+.tlist li.s-ministere{border-left-color:color-mix(in srgb,var(--ministere) 45%,transparent)}
+.tlist li.s-vie{border-left-color:color-mix(in srgb,var(--vie) 45%,transparent)}
+.tlist li.cur{border-left-color:var(--accent)}
+.total{display:flex;gap:16px;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;position:sticky;top:0;background:var(--card)}
+.total b{font-family:var(--f-mono)}
+
+/* Finitions */
+.logo{width:38px;height:38px;display:grid;place-items:center;flex:none}
+.logo svg{width:38px;height:38px;display:block}
+.msg{display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--line)}
+.msg:first-of-type{border-top:0}
+.msg textarea{font-size:13.5px;line-height:1.45;resize:vertical;background:var(--soft)}
+.btn.wa{background:#1f8f4e;border-color:#1f8f4e;color:#fff;text-decoration:none}
+.card,.section{box-shadow:0 1px 2px rgba(20,40,36,.05),0 6px 18px rgba(20,40,36,.04)}
+.hero{padding:16px;display:flex;flex-direction:column;gap:14px;margin-bottom:14px;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 8%,var(--card)),var(--card) 70%)}
+.hero-top{display:flex;align-items:center;gap:12px}
+.cal{width:60px;flex:none;border-radius:11px;overflow:hidden;text-align:center;background:var(--card);border:1px solid var(--line);box-shadow:0 2px 6px rgba(20,40,36,.08)}
+.cal small{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.cal small:first-child{background:var(--accent);color:var(--accent-ink);padding:3px 0}
+.cal b{display:block;font-family:var(--f-display);font-size:26px;line-height:1.1;padding-top:2px}
+.cal small:nth-of-type(2){color:var(--muted);padding-bottom:4px}
+.cal{position:relative;cursor:pointer;transition:transform .15s}
+.cal:hover{transform:translateY(-1px)}
+.cal-pick{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
+.stat.tap{cursor:pointer}
+.stat.tap:hover{border-color:var(--warn)}
+.stat span em{font-style:normal;color:var(--warn)}
+
+/* Ressenti d'application */
+@keyframes slideL{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes slideR{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+main.a-l{animation:slideL .24s ease-out} main.a-r{animation:slideR .24s ease-out} main.a-f{animation:fadeUp .22s ease-out}
+.skel{display:grid;gap:12px}
+.skel i{display:block;height:84px;border-radius:12px;background:linear-gradient(90deg,var(--soft) 0%,var(--card) 50%,var(--soft) 100%);background-size:200% 100%;animation:shimmer 1.3s linear infinite}
+.skel i:first-child{height:170px}
+@keyframes shimmer{to{background-position:-200% 0}}
+.toast{display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast .undo{border:0;background:transparent;color:inherit;font-weight:700;font-size:14px;cursor:pointer;padding:6px 4px;text-decoration:underline;text-underline-offset:3px;text-transform:uppercase;letter-spacing:.04em}
+.fab{display:none}
+.btn:active,.icon-btn:active,.fab:active{transform:scale(.97)}
+.list li:active{background:var(--soft)}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  .icon-btn{min-width:40px;min-height:40px;justify-content:center;align-items:center}
+  .btn{min-height:42px}
+}
+@media (max-width:720px){
+  .fab{display:grid;place-items:center;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));
+    width:58px;height:58px;border-radius:18px;border:0;background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 22px rgba(20,40,36,.28);z-index:24;cursor:pointer}
+  .fab svg{width:26px;height:26px}
+  .toolbar .add-desktop{display:none}
+  .toast{bottom:calc(156px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:560px){
+  dialog{width:100%;max-width:100%;margin:auto 0 0;border-radius:20px 20px 0 0;border-bottom:0;max-height:92dvh;animation:sheet .26s ease-out}
+  dialog form{max-height:92dvh}
+  .dlg-h{position:relative;padding-top:22px}
+  .dlg-h::before{content:"";position:absolute;left:50%;top:8px;width:40px;height:4px;border-radius:4px;background:var(--line);transform:translateX(-50%)}
+  .dlg-f{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .dlg-f .btn{flex:1 1 auto;justify-content:center}
+}
+@keyframes sheet{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){main.a-l,main.a-r,main.a-f,dialog,.skel i{animation:none!important}}
+.hero-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.hero-t h1{font-size:clamp(21px,4vw,28px)}
+.hero-t .sub{color:var(--muted);font-size:13.5px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.stat span{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.stat b{font-family:var(--f-display);font-size:23px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat b small{font-size:13px;color:var(--muted);font-weight:500}
+.meter{height:5px;border-radius:9px;background:var(--soft);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--warn);border-radius:9px}
+.meter.full i{background:var(--ok)}
+.hero-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:560px){.hero-actions .btn{flex:1 1 auto;justify-content:center}.stat b{font-size:17px}.stat{padding:8px 10px}}
+.part{padding:14px 14px 16px}
+.part .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;padding:0;margin-top:4px;font-size:13px;background:color-mix(in srgb,currentColor 13%,transparent)}
+.part-title{gap:6px}
+.part-title input[type=text]{flex:1;border-color:transparent;background:transparent;font-size:16px;padding-left:6px}
+.part-title input[type=text]:hover{border-color:var(--line)}
+.part-title input[type=text]:focus{background:var(--card)}
+.tools{display:inline-flex}
+.tools .icon-btn{padding:5px}
+.tools .icon-btn:disabled{opacity:.3;cursor:default;background:transparent}
+.tools .del:hover{color:var(--bad)}
+.ico{width:30px;height:30px;display:grid;place-items:center;color:var(--muted)}
+.ico svg{width:17px;height:17px}
+.section.vie .ico{color:var(--vie)}
+select.unset{border-style:dashed;background:var(--soft)}
+.section>h2{padding:10px 14px}
+.avatar{background:color-mix(in srgb,var(--accent) 13%,var(--card))}
+.avatar.f{background:color-mix(in srgb,var(--vie) 12%,var(--card))}
+.chip.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.chip.warn{background:color-mix(in srgb,var(--warn) 13%,transparent)}
+.datebox{background:var(--card);overflow:hidden;padding:0}
+.datebox small{display:block;background:var(--soft);padding:2px 0}
+.datebox b{padding:3px 0 4px}
+.clock{transition:background-color .4s}
+.clock.amber{background:color-mix(in srgb,var(--warn) 9%,var(--card))}
+.clock.over{background:color-mix(in srgb,var(--bad) 9%,var(--card))}
+.bar{height:12px}
+.upnext{color:var(--muted);font-size:14px;max-width:46ch}
+.upnext b{color:var(--ink)}
+.toolbar h1,.month-h{letter-spacing:-.01em}
+
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-weight:700;z-index:60;max-width:calc(100vw - 32px)}
+@media (min-width:721px){.toast{bottom:28px}}
+.loading{padding:40px 0;text-align:center;color:var(--muted)}
+.ro input,.ro select,.ro textarea{pointer-events:none;opacity:.8}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <span class="logo" aria-hidden="true"><svg viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#1f5e58"/><circle cx="256" cy="188" r="86" fill="none" stroke="#2f7a72" stroke-width="22"/><path d="M256 102 A86 86 0 1 1 181.5 231" fill="none" stroke="#e2b552" stroke-width="22" stroke-linecap="round"/><rect x="236" y="70" width="40" height="22" rx="8" fill="#e2b552"/><path d="M256 188 V138 M256 188 L290 210" stroke="#fff" stroke-width="16" stroke-linecap="round"/><circle cx="256" cy="188" r="12" fill="#fff"/><path d="M88 318 C150 286 212 288 256 322 C300 288 362 286 424 318 V430 C362 400 300 402 256 436 C212 402 150 400 88 430 Z" fill="#fff"/><path d="M256 324 V434" stroke="#1f5e58" stroke-width="10" stroke-linecap="round"/></svg></span>
+    <div class="brand">
+      <b id="congName">Programme des réunions</b>
+      <small><span class="dot" id="syncDot"></span><span id="syncTxt">Connexion…</span></small>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#semaine" data-tab="semaine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Semaine</a>
+      <a href="#weekend" data-tab="weekend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M5 21v-5a7 7 0 0 1 14 0v5M3 21h18"/><circle cx="12" cy="10" r="2"/></svg>Week-end</a>
+      <a href="#proclamateurs" data-tab="proclamateurs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></svg>Proclamateurs</a>
+      <a href="#orateurs" data-tab="orateurs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>Orateurs</a>
+    </nav>
+    <button class="btn sm primary" id="installBtn" hidden>Installer</button>
+    <button class="icon-btn" id="openSettings" title="Paramètres" aria-label="Paramètres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
+</header>
+
+<main class="wrap" id="main"><div class="skel"><i></i><i></i><i></i><i></i></div></main>
+
+<dialog id="dlg"></dialog>
+<div id="timerRoot"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------- Utilitaires ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = p => p + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+const clone = o => JSON.parse(JSON.stringify(o ?? {}));
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseD = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d || 1); };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const monday = d => { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); return addDays(x, -((x.getDay() + 6) % 7)); };
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const fmtD = d => `${d.getDate()} ${MOIS[d.getMonth()]}`;
+const fmtLong = d => `${cap(JOURS[d.getDay()])} ${fmtD(d)} ${d.getFullYear()}`;
+function weekLabel(key){ const m = parseD(key), s = addDays(m, 6);
+  return m.getMonth() === s.getMonth() ? `${m.getDate()}–${s.getDate()} ${MOIS[s.getMonth()]} ${s.getFullYear()}` : `${fmtD(m)} – ${fmtD(s)} ${s.getFullYear()}`; }
+const mmss = sec => { const s = Math.round(Math.abs(sec)); return `${Math.floor(s / 60)}:${pad(s % 60)}`; };
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+const QUALS = [
+  ['president','Président (semaine)'], ['priere','Prière'], ['joyaux','Discours – Joyaux'], ['perles','Perles spirituelles'],
+  ['lecture','Lecture de la Bible'], ['ministere','Exposés – Ministère'], ['vie','Parties – Vie chrétienne'],
+  ['etude','Conducteur – Étude biblique'], ['lecteur','Lecteur'], ['presidentWE','Président (week-end)'],
+  ['conducteurTG','Conducteur – Tour de Garde'], ['orateur','Orateur (discours public)']
+];
+const SECTIONS = { joyaux: 'Joyaux de la Parole de Dieu', ministere: 'Applique-toi au ministère', vie: 'Vie chrétienne' };
+const DEFAULT_CONFIG = { congregation: 'Mon assemblée', midweekDay: 4, midweekTime: '18:30', weekendDay: 0, weekendTime: '09:00', aux: false };
+
+/* ---------- Données ---------- */
+const S = { people: {}, speakers: {}, midweek: {}, weekend: {}, config: { ...DEFAULT_CONFIG }, mode: 'loading', canWrite: true, loaded: new Set() };
+const COLS = ['people', 'speakers', 'midweek', 'weekend'];
+let db = null, saving = 0, DL = null;
+const exportBtn = what => DL ? `<button class="btn" data-act="export" data-what="${what}">${I.dl}Exporter</button>` : '';
+const queue = {};
+
+function loadLocal(){ const d = lsGet('vcm-data-v1'); if (d) { COLS.forEach(c => S[c] = d[c] || {}); S.config = { ...DEFAULT_CONFIG, ...(d.config || {}) }; } }
+function saveLocal(){ lsSet('vcm-data-v1', { people: S.people, speakers: S.speakers, midweek: S.midweek, weekend: S.weekend, config: S.config }); }
+const pathOf = (col, id) => col === 'config' ? 'config/main' : `${col}/${id}`;
+const isPending = p => queue[p] && (queue[p].data || queue[p].busy);
+
+function persist(col, id, data, delay = 600){
+  if (!db) { saveLocal(); return; }
+  const p = pathOf(col, id);
+  const e = queue[p] || (queue[p] = { busy: false, data: null, timer: null, del: false });
+  e.data = data; e.del = false; clearTimeout(e.timer); e.timer = setTimeout(() => flush(p), delay);
+  syncStatus();
+}
+async function flush(p){
+  const e = queue[p]; if (!e) return;
+  if (e.busy) { e.timer = setTimeout(() => flush(p), 300); return; }
+  if (!e.data && !e.del) return;
+  const data = e.data, del = e.del; e.data = null; e.del = false; e.busy = true; saving++; syncStatus();
+  try { if (del) await db.doc(p).delete(); else await db.doc(p).set(clone(data)); }
+  catch (err) { writeError(err); }
+  finally { e.busy = false; saving--; syncStatus(); }
+}
+function writeError(err){
+  const c = err && err.code;
+  if (c === 'invalid_argument' || c === 'not_granted') { S.canWrite = false; toast('Vous pouvez consulter ce programme, mais pas le modifier.'); render(); }
+  else if (c === 'quota_exceeded') toast('Stockage plein : supprimez d’anciennes semaines puis réessayez.');
+  else toast('Enregistrement impossible pour le moment. Réessayez dans un instant.');
+}
+function edit(col, id, fn, delay){ const x = clone(S[col][id]); fn(x); S[col][id] = x; persist(col, id, x, delay); return x; }
+function setConfig(fn){ const c = clone(S.config); fn(c); S.config = c; persist('config', 'main', c, 400); }
+function removeDoc(col, id){
+  delete S[col][id];
+  if (!db) { saveLocal(); return; }
+  const p = pathOf(col, id); const e = queue[p] || (queue[p] = { busy: false, data: null, timer: null });
+  e.data = null; e.del = true; clearTimeout(e.timer); flush(p);
+}
+function syncStatus(){
+  const dot = $('#syncDot'), t = $('#syncTxt');
+  const pend = saving > 0 || Object.values(queue).some(e => e.data || e.del);
+  if (S.mode === 'db') { dot.className = 'dot ' + (pend ? 'warn' : 'ok'); t.textContent = pend ? 'Enregistrement…' : (S.canWrite ? 'Enregistré en ligne' : 'Lecture seule'); }
+  else if (S.mode === 'local') { dot.className = 'dot warn'; t.textContent = 'Enregistré sur cet appareil seulement'; }
+  else { dot.className = 'dot'; t.textContent = 'Connexion…'; }
+}
+
+const MIME = { pdf: 'application/pdf', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', json: 'application/json' };
+async function boot(){
+  let usedb = null, user = null;
+  /* Hors de Claude (application installée) : téléchargement classique du navigateur */
+  if (!(window.claude && window.claude.use)) DL = { save: async ({ filename, data }) => {
+    const blob = data instanceof Blob ? data : new Blob([data], { type: MIME[filename.split('.').pop()] || 'application/octet-stream' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000); return { status: 'saved' }; } };
+  try { if (window.claude && window.claude.use) window.claude.use('downloads').then(d => { DL = d; if (d) scheduleRender(); }).catch(() => {}); } catch {}
+  try { if (window.claude && window.claude.use) [usedb, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]); } catch {}
+  if (!usedb) { S.mode = 'local'; loadLocal(); syncStatus(); render(); return; }
+  db = usedb; S.mode = 'db';
+  try { if (user && user.can) { const w = await user.can('data.write'); if (w === false) S.canWrite = false; } } catch {}
+  syncStatus();
+  const slow = setTimeout(() => { if (S.loaded.size < 5) { $('#syncTxt').textContent = 'Données pas encore joignables…'; } }, 10000);
+  const done = () => { if (S.loaded.size >= 5) clearTimeout(slow); };
+  COLS.forEach(col => {
+    db.collection(col).onSnapshot(snap => {
+      const m = {};
+      snap.docs.forEach(d => { const p = `${col}/${d.id}`; m[d.id] = isPending(p) ? S[col][d.id] : d.data(); });
+      Object.keys(S[col]).forEach(id => { if (!m[id] && isPending(`${col}/${id}`) && queue[`${col}/${id}`].data) m[id] = S[col][id]; });
+      S[col] = m; if (!snap.metadata.fromCache) S.loaded.add(col); done(); scheduleRender();
+    }, () => { S.loaded.add(col); scheduleRender(); });
+  });
+  db.doc('config/main').onSnapshot(snap => {
+    if (!isPending('config/main')) S.config = { ...DEFAULT_CONFIG, ...(snap.exists ? snap.data() : {}) };
+    if (!snap.metadata.fromCache) S.loaded.add('config'); done(); scheduleRender();
+  }, () => { S.loaded.add('config'); scheduleRender(); });
+}
+
+/* ---------- Interface : état ---------- */
+const today = new Date();
+/* Semaine de la prochaine réunion : si la réunion de cette semaine est passée, on montre la suivante */
+function nextMeetingWeek(){
+  const m = monday(today), md = addDays(m, (S.config.midweekDay + 6) % 7);
+  return iso(new Date(today.getFullYear(), today.getMonth(), today.getDate()) > md ? addDays(m, 7) : m);
+}
+const UI = {
+  tab: 'semaine', week: nextMeetingWeek(), anim: null, peopleFilter: 'tous', search: '',
+  weStart: lsGet('vcm-we-start') || `${today.getFullYear()}-${pad(today.getMonth() + 1)}`, weMonths: lsGet('vcm-we-months') || 4,
+  openWE: new Set(), confirm: null
+};
+let pendingRender = false;
+function scheduleRender(){
+  const a = document.activeElement;
+  if (a && a.matches && a.matches('input,textarea') && $('#main').contains(a)) { pendingRender = true; return; }
+  if ($('#dlg').open) { pendingRender = true; return; }
+  render();
+}
+document.addEventListener('focusout', () => { if (pendingRender) setTimeout(() => { if (pendingRender) { pendingRender = false; scheduleRender(); } }, 50); });
+
+function toast(msg, undo){
+  const t = $('#toast'); t.innerHTML = ''; const s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
+  if (undo) { const b = document.createElement('button'); b.className = 'undo'; b.type = 'button'; b.textContent = 'Annuler';
+    b.onclick = () => { t.hidden = true; undo(); render(); toast('Restauré'); }; t.appendChild(b); }
+  t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, undo ? 6500 : 2800);
+}
+function restore(col, id, data){ S[col][id] = data; persist(col, id, data, 0); }
+
+/* ---------- Index des attributions (pour la rotation) ---------- */
+let IDX = {};
+function buildIndex(){
+  IDX = {};
+  const add = (pid, date) => { if (!pid) return; (IDX[pid] || (IDX[pid] = [])).push(date); };
+  for (const [k, w] of Object.entries(S.midweek)) {
+    const d = iso(addDays(parseD(k), (S.config.midweekDay + 6) % 7));
+    ['chairman','auxCounselor','prayerOpen','prayerClose'].forEach(f => add(w[f], d));
+    (w.parts || []).forEach(p => ['a','b','auxA','auxB'].forEach(f => add(p[f], d)));
+  }
+  for (const [k, w] of Object.entries(S.weekend)) ['chairman','conductor','reader','prayer','speakerId'].forEach(f => add(w[f], k));
+  Object.values(IDX).forEach(a => a.sort());
+}
+function lastBefore(pid, refISO){ const a = IDX[pid] || []; let r = null; for (const d of a) { if (d < refISO) r = d; else break; } return r; }
+function agoLabel(pid, refISO){
+  const l = lastBefore(pid, refISO); if (!l) return 'jamais';
+  const w = Math.round((parseD(refISO) - parseD(l)) / 6048e5);
+  return w <= 0 ? 'cette sem.' : `il y a ${w} sem.`;
+}
+const pname = id => (S.people[id] && S.people[id].name) || '';
+const byName = (a, b) => (a.name || '').localeCompare(b.name || '', 'fr');
+
+function personSelect(field, value, qual, { sex = null, ref = iso(today), part = '', cls = '' } = {}){
+  const all = Object.entries(S.people).map(([id, p]) => ({ id, ...p }));
+  const ok = p => (p.quals || []).includes(qual) && (!sex || p.sex === sex);
+  const q = all.filter(ok).sort((a, b) => { const la = lastBefore(a.id, ref) || '', lb = lastBefore(b.id, ref) || ''; return la === lb ? byName(a, b) : la < lb ? -1 : 1; });
+  const rest = all.filter(p => !ok(p)).sort(byName);
+  const opt = p => `<option value="${esc(p.id)}"${p.id === value ? ' selected' : ''}>${esc(p.name)} · ${agoLabel(p.id, ref)}</option>`;
+  let h = `<select data-f="${field}"${part ? ` data-part="${part}"` : ''} class="${value ? '' : 'unset'} ${cls}" data-pid="${esc(value || '')}"><option value="">— à attribuer —</option>`;
+  if (value && !S.people[value]) h += `<option value="${esc(value)}" selected>(personne supprimée)</option>`;
+  if (q.length) h += `<optgroup label="Qualifiés (le moins récent en premier)">${q.map(opt).join('')}</optgroup>`;
+  if (rest.length) h += `<optgroup label="Autres">${rest.map(opt).join('')}</optgroup>`;
+  return h + '</select>';
+}
+const fld = (label, inner, cls = '') => `<label class="fld ${cls}"><span>${label}</span>${inner}</label>`;
+
+/* ---------- Icônes ---------- */
+const I = {
+  prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  timer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>',
+  next2: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v14l10-7zM17 5h2v14h-2z"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>',
+  dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>'
+};
+
+/* ---------- Rendu ---------- */
+function render(){
+  pendingRender = false;
+  buildIndex();
+  $('#congName').textContent = S.config.congregation || 'Programme des réunions';
+  document.querySelectorAll('nav.tabs a').forEach(a => a.setAttribute('aria-current', a.dataset.tab === UI.tab ? 'page' : 'false'));
+  const m = $('#main');
+  if (S.mode === 'loading') { m.innerHTML = SKELETON; return; }
+  m.classList.toggle('ro', !S.canWrite);
+  m.innerHTML = UI.tab === 'weekend' ? viewWeekend() : UI.tab === 'proclamateurs' ? viewPeople() : UI.tab === 'orateurs' ? viewSpeakers() : viewWeek();
+  if (UI.anim) { m.classList.remove('a-l', 'a-r', 'a-f'); void m.offsetWidth; m.classList.add(UI.anim === 'fade' ? 'a-f' : UI.anim > 0 ? 'a-l' : 'a-r'); UI.anim = null; }
+  if (!S.canWrite) m.querySelectorAll('input,select,textarea').forEach(e => e.disabled = true);
+  syncStatus();
+}
+
+const SKELETON = '<div class="skel" aria-label="Chargement du programme"><i></i><i></i><i></i><i></i></div>';
+/* ----- Semaine (Vie et ministère) ----- */
+function newPart(sec, over = {}){
+  const base = { joyaux: { kind: 'talk', title: 'Nouvelle partie', min: 5, q: 'joyaux' },
+                 ministere: { kind: 'student', title: 'Exposé', min: 4, q: 'ministere' },
+                 vie: { kind: 'talk', title: 'Partie', min: 10, q: 'vie' } }[sec];
+  return { id: uid('x'), sec, ...base, ...over };
+}
+function templateWeek(key){
+  return { week: key, label: '', event: '', songOpen: '', songMid: '', songClose: '', chairman: '', auxCounselor: '', prayerOpen: '', prayerClose: '',
+    parts: [
+      newPart('joyaux', { title: 'Discours', min: 10 }),
+      newPart('joyaux', { title: 'Perles spirituelles', min: 10, q: 'perles' }),
+      newPart('joyaux', { kind: 'student', solo: true, title: 'Lecture de la Bible', min: 4, q: 'lecture' }),
+      newPart('ministere', { title: 'Engage la conversation', min: 3 }),
+      newPart('ministere', { title: 'Entretiens l’intérêt', min: 4 }),
+      newPart('ministere', { title: 'Fais des disciples', min: 5 }),
+      newPart('vie', { title: 'Partie', min: 15 }),
+      newPart('vie', { kind: 'study', title: 'Étude biblique de l’assemblée', min: 30, q: 'etude' })
+    ] };
+}
+function meetingDate(key){ return addDays(parseD(key), (S.config.midweekDay + 6) % 7); }
+
+function viewWeek(){
+  const key = UI.week, w = S.midweek[key], md = meetingDate(key), ref = iso(md);
+  const st = w && w.event !== 'assemblee' ? weekStats(w) : null;
+  let h = `<section class="hero card">
+    <div class="hero-top">
+      <button class="icon-btn" data-act="wk-prev" aria-label="Semaine précédente">${I.prev}</button>
+      <label class="cal" title="Choisir une autre date"><small>${JOURS[md.getDay()].slice(0, 3)}</small><b>${md.getDate()}</b><small>${['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'][md.getMonth()]}</small><input type="date" class="cal-pick" value="${iso(md)}" aria-label="Aller à une autre date"></label>
+      <div class="hero-t"><span class="eyebrow">Vie et ministère chrétiens</span><h1>${weekLabel(key)}</h1>
+        <div class="sub">${fmtLong(md)} à ${esc(S.config.midweekTime)}${w && w.label ? ' · <b>' + esc(w.label) + '</b>' : ''}</div></div>
+      <button class="icon-btn" data-act="wk-next" aria-label="Semaine suivante">${I.next}</button>
+    </div>
+    ${st ? `<div class="stats">
+      <div class="stat${st.filled < st.total ? ' tap' : ''}"${st.filled < st.total ? ' data-act="goto-unset" role="button" tabindex="0" title="Aller au prochain rôle à attribuer"' : ''}><span>Attributions${st.filled < st.total ? ' <em>· voir</em>' : ''}</span><b>${st.filled}<small> / ${st.total}</small></b><div class="meter${st.filled === st.total ? ' full' : ''}"><i style="width:${st.total ? Math.round(st.filled / st.total * 100) : 0}%"></i></div></div>
+      <div class="stat"><span>Durée prévue</span><b>${hm(st.dur)}</b></div>
+      <div class="stat"><span>Parties</span><b>${(w.parts || []).length}</b></div></div>` : ''}
+    <div class="hero-actions">
+      ${key !== nextMeetingWeek() ? `<button class="btn ghost" data-act="wk-today">Prochaine réunion</button>` : ''}
+      ${exportBtn('week')}
+      ${w ? `<button class="btn" data-act="copy-week">${I.copy}Copier</button><button class="btn" data-act="msg-week">${I.chat}Messages</button><button class="btn primary" data-act="timer-week">${I.timer}Chronomètre</button>` : ''}
+    </div></section>`;
+  if (!w) {
+    const prevKey = iso(addDays(parseD(key), -7));
+    return h + `<div class="card empty"><h2>Pas encore de programme pour cette semaine</h2>
+      <p>Créez la réunion à partir du modèle habituel (Joyaux, Ministère, Vie chrétienne), puis ajustez les titres et les durées selon le cahier.</p>
+      <div class="row" style="justify-content:center"><button class="btn primary" data-act="wk-create">${I.plus}Créer le programme</button>
+      ${S.midweek[prevKey] ? `<button class="btn" data-act="wk-copyprev">Reprendre la structure de la semaine précédente</button>` : ''}</div></div>`;
+  }
+  // doublons
+  const cnt = {}; const bump = id => { if (id) cnt[id] = (cnt[id] || 0) + 1; };
+  ['chairman','prayerOpen','prayerClose','auxCounselor'].forEach(f => bump(w[f]));
+  (w.parts || []).forEach(p => ['a','b','auxA','auxB'].forEach(f => bump(p[f])));
+  const dupIds = Object.keys(cnt).filter(k => cnt[k] > 1);
+
+  h += `<div class="card meta-grid">
+    ${fld('Lecture biblique de la semaine', `<input type="text" id="w-label" data-f="label" value="${esc(w.label)}" placeholder="ex. ISAÏE 1-2">`)}
+    ${fld('Type de semaine', `<select id="w-event" data-f="event">
+      <option value=""${!w.event ? ' selected' : ''}>Réunion normale</option>
+      <option value="visite"${w.event === 'visite' ? ' selected' : ''}>Visite du responsable de circonscription</option>
+      <option value="assemblee"${w.event === 'assemblee' ? ' selected' : ''}>Assemblée (pas de réunion)</option>
+      <option value="memorial"${w.event === 'memorial' ? ' selected' : ''}>Semaine du Mémorial</option></select>`)}
+    ${fld('Président', personSelect('chairman', w.chairman, 'president', { ref }))}
+    ${S.config.aux ? fld('Conseiller – classe auxiliaire', personSelect('auxCounselor', w.auxCounselor, 'president', { ref })) : ''}
+  </div>`;
+  if (dupIds.length) h += `<div class="banner"><span class="chip warn">À vérifier</span><span>${dupIds.map(id => esc(pname(id) || '?')).join(', ')} ${dupIds.length > 1 ? 'ont' : 'a'} plusieurs attributions cette semaine.</span></div>`;
+  if (w.event === 'assemblee') return h + `<div class="banner"><b>Semaine d’assemblée.</b><span class="muted">Pas de réunion en semaine. Le programme saisi est conservé si vous changez d’avis.</span></div>`;
+  if (w.event === 'visite') h += `<div class="banner"><span class="chip acc">Visite</span><span class="muted">Pensez à remplacer l’étude biblique de l’assemblée par le discours du responsable de circonscription (30 min).</span></div>`;
+
+  // Ouverture
+  h += `<div class="section neutral"><h2>Ouverture</h2>
+    <div class="fixed-line" style="border-top:0"><span class="ico">${I.note}</span><div class="inner">
+      ${fld('Cantique d’ouverture', `<input type="text" inputmode="numeric" class="num" data-f="songOpen" value="${esc(w.songOpen)}" placeholder="n°">`)}
+      ${fld('Prière', personSelect('prayerOpen', w.prayerOpen, 'priere', { ref, cls: dupIds.includes(w.prayerOpen) ? 'dup' : '' }))}
+    </div></div>
+    <div class="fixed-line"><span class="ico">${I.mic}</span><div class="inner"><div><div class="lbl">Paroles d’introduction</div><div class="muted">1 min · président</div></div></div></div>
+  </div>`;
+  let n = 0;
+  for (const sec of ['joyaux', 'ministere', 'vie']) {
+    const parts = (w.parts || []).filter(p => p.sec === sec);
+    const total = parts.reduce((s, p) => s + (+p.min || 0), 0);
+    h += `<div class="section ${sec}"><h2>${SECTIONS[sec]}<span class="chip">${total} min</span></h2>`;
+    if (sec === 'vie') h += `<div class="fixed-line" style="border-top:0"><span class="ico">${I.note}</span><div class="inner">${fld('Cantique', `<input type="text" inputmode="numeric" class="num" data-f="songMid" value="${esc(w.songMid)}" placeholder="n°">`)}</div></div>`;
+    h += `<ul class="parts">`;
+    parts.forEach((p, i) => { n++; h += partRow(p, n, i, parts.length, ref, dupIds); });
+    h += `</ul><div class="add-part"><button class="btn sm ghost" data-act="part-add" data-sec="${sec}">${I.plus}Ajouter une partie</button></div></div>`;
+  }
+  h += `<div class="section neutral"><h2>Conclusion</h2>
+    <div class="fixed-line" style="border-top:0"><span class="ico">${I.mic}</span><div class="inner"><div><div class="lbl">Paroles de conclusion</div><div class="muted">3 min · président</div></div></div></div>
+    <div class="fixed-line"><span class="ico">${I.note}</span><div class="inner">
+      ${fld('Cantique final', `<input type="text" inputmode="numeric" class="num" data-f="songClose" value="${esc(w.songClose)}" placeholder="n°">`)}
+      ${fld('Prière', personSelect('prayerClose', w.prayerClose, 'priere', { ref, cls: dupIds.includes(w.prayerClose) ? 'dup' : '' }))}
+    </div></div></div>
+    <div class="row" style="margin-top:16px">
+      <span class="muted" style="font-size:13px">La durée prévue compte les cantiques et la minute de conseils après chaque exposé.</span><span class="spacer"></span>
+      <button class="btn ghost danger sm" data-act="wk-delete">Supprimer cette semaine</button>
+    </div>`;
+  return h;
+}
+const hm = sec => { const m = Math.round(sec / 60); return `${Math.floor(m / 60)} h ${pad(m % 60)}`; };
+function weekStats(w){
+  let total = 3, filled = [w.chairman, w.prayerOpen, w.prayerClose].filter(Boolean).length;
+  const slot = v => { total++; if (v) filled++; };
+  if (S.config.aux) slot(w.auxCounselor);
+  for (const p of w.parts || []) {
+    slot(p.a);
+    if (p.kind === 'study' || (p.kind === 'student' && !p.solo)) slot(p.b);
+    if (S.config.aux && p.kind === 'student') { slot(p.auxA); if (!p.solo) slot(p.auxB); }
+  }
+  return { total, filled, dur: midweekItems(w).reduce((s, x) => s + x.min * 60, 0) };
+}
+function partRow(p, n, i, len, ref, dup){
+  const d = id => dup.includes(id) ? 'dup' : '';
+  const firstSex = p.a && S.people[p.a] ? S.people[p.a].sex : null;
+  const auxSex = p.auxA && S.people[p.auxA] ? S.people[p.auxA].sex : null;
+  let roles = '';
+  if (p.kind === 'study') roles = fld('Conducteur', personSelect('a', p.a, 'etude', { ref, part: p.id, cls: d(p.a) })) + fld('Lecteur', personSelect('b', p.b, 'lecteur', { ref, part: p.id, cls: d(p.b) }));
+  else if (p.kind === 'student') {
+    roles = fld(p.solo ? 'Élève' : 'Élève', personSelect('a', p.a, p.q, { ref, part: p.id, cls: d(p.a) }));
+    if (!p.solo) roles += fld('Interlocuteur', personSelect('b', p.b, 'ministere', { ref, part: p.id, sex: firstSex, cls: d(p.b) }));
+  } else roles = fld('Attribué à', personSelect('a', p.a, p.q, { ref, part: p.id, cls: d(p.a) }));
+  let aux = '';
+  if (S.config.aux && p.kind === 'student') {
+    aux = `<div class="assign aux-row">${fld('Classe aux. – élève', personSelect('auxA', p.auxA, p.q, { ref, part: p.id, cls: d(p.auxA) }))}${p.solo ? '' : fld('Classe aux. – interlocuteur', personSelect('auxB', p.auxB, 'ministere', { ref, part: p.id, sex: auxSex, cls: d(p.auxB) }))}</div>`;
+  }
+  const kindSel = p.sec === 'ministere' ? `<select data-part="${p.id}" data-f="solo" style="width:auto" aria-label="Format"><option value=""${!p.solo ? ' selected' : ''}>Avec interlocuteur</option><option value="1"${p.solo ? ' selected' : ''}>Discours (seul)</option></select>`
+    : p.sec === 'vie' ? `<select data-part="${p.id}" data-f="kind" style="width:auto" aria-label="Format"><option value="talk"${p.kind === 'talk' ? ' selected' : ''}>Partie</option><option value="study"${p.kind === 'study' ? ' selected' : ''}>Étude biblique</option></select>` : '';
+  return `<li class="part"><span class="n">${n}</span><div class="part-main">
+    <div class="part-title"><input type="text" data-part="${p.id}" data-f="title" value="${esc(p.title)}" aria-label="Titre de la partie">
+      <label class="minlab"><input type="number" min="1" max="60" class="num" data-part="${p.id}" data-f="min" value="${esc(p.min)}" aria-label="Durée en minutes">min</label>
+      <span class="tools">
+      <button class="icon-btn" data-act="part-up" data-part="${p.id}" ${i === 0 ? 'disabled' : ''} aria-label="Monter">${I.up}</button>
+      <button class="icon-btn" data-act="part-down" data-part="${p.id}" ${i === len - 1 ? 'disabled' : ''} aria-label="Descendre">${I.down}</button>
+      <button class="icon-btn del" data-act="part-del" data-part="${p.id}" aria-label="Supprimer la partie">${I.x}</button></span></div>
+    <div class="assign">${kindSel ? fld('Format', kindSel) : ''}${roles}</div>${aux}</div></li>`;
+}
+function midweekItems(w){
+  const P = id => pname(id) || '—';
+  const items = [{ sec: 'intro', label: `Cantique ${w.songOpen || ''} et prière`.replace('  ', ' '), who: P(w.prayerOpen), min: 5 },
+                 { sec: 'intro', label: 'Paroles d’introduction', who: P(w.chairman), min: 1 }];
+  let n = 0;
+  for (const sec of ['joyaux', 'ministere', 'vie']) {
+    if (sec === 'vie') items.push({ sec, label: `Cantique ${w.songMid || ''}`.trim(), who: '', min: 3 });
+    for (const p of (w.parts || []).filter(x => x.sec === sec)) {
+      n++;
+      const who = p.kind === 'study' ? `${P(p.a)} · lecteur : ${P(p.b)}` : p.kind === 'student' && !p.solo ? `${P(p.a)} / ${P(p.b)}` : P(p.a);
+      items.push({ sec, label: `${n}. ${p.title}`, who, min: +p.min || 0 });
+      if (p.kind === 'student') items.push({ sec, label: 'Conseils du président', who: P(w.chairman), min: 1 });
+    }
+  }
+  items.push({ sec: 'fin', label: 'Paroles de conclusion', who: P(w.chairman), min: 3 });
+  items.push({ sec: 'fin', label: `Cantique ${w.songClose || ''} et prière`.replace('  ', ' '), who: P(w.prayerClose), min: 5 });
+  return items;
+}
+function weekText(key){
+  const w = S.midweek[key], P = id => pname(id) || '—', md = meetingDate(key);
+  let t = `*${S.config.congregation} — Réunion de semaine*\n${weekLabel(key)}${w.label ? ' · ' + w.label : ''}\n${fmtLong(md)} à ${S.config.midweekTime}\n\nPrésident : ${P(w.chairman)}\n`;
+  if (w.event === 'assemblee') return t + '\nSemaine d’assemblée : pas de réunion.';
+  t += `Cantique ${w.songOpen || '…'} · Prière : ${P(w.prayerOpen)}\n`;
+  let n = 0;
+  for (const sec of ['joyaux', 'ministere', 'vie']) {
+    t += `\n*${SECTIONS[sec].toUpperCase()}*\n`;
+    if (sec === 'vie') t += `Cantique ${w.songMid || '…'}\n`;
+    for (const p of (w.parts || []).filter(x => x.sec === sec)) {
+      n++;
+      const who = p.kind === 'study' ? `${P(p.a)} (lecteur : ${P(p.b)})` : p.kind === 'student' && !p.solo ? `${P(p.a)} / ${P(p.b)}` : P(p.a);
+      t += `${n}. ${p.title} (${p.min} min) : ${who}\n`;
+      if (S.config.aux && p.kind === 'student' && (p.auxA || p.auxB)) t += `   Classe aux. : ${P(p.auxA)}${p.solo ? '' : ' / ' + P(p.auxB)}\n`;
+    }
+  }
+  return t + `\nCantique ${w.songClose || '…'} · Prière : ${P(w.prayerClose)}`;
+}
+
+/* ----- Week-end ----- */
+function weDates(){
+  const [y, m] = UI.weStart.split('-').map(Number), start = new Date(y, m - 1, 1), end = new Date(y, m - 1 + UI.weMonths, 1);
+  const out = []; let d = new Date(start); while (d.getDay() !== S.config.weekendDay) d = addDays(d, 1);
+  for (; d < end; d = addDays(d, 7)) out.push(iso(d));
+  return out;
+}
+function viewWeekend(){
+  const dates = weDates(), existing = dates.filter(d => S.weekend[d]), missing = dates.length - existing.length;
+  const sp = [...new Set([...Object.values(S.speakers).map(s => s.name), ...Object.values(S.people).filter(p => (p.quals || []).includes('orateur')).map(p => p.name)])].filter(Boolean).sort((a, b) => a.localeCompare(b, 'fr'));
+  // talk repeats
+  const talks = {}; Object.entries(S.weekend).forEach(([k, w]) => { if (w.talkNo) (talks[w.talkNo] || (talks[w.talkNo] = [])).push(k); });
+  const [y, m] = UI.weStart.split('-').map(Number), endM = new Date(y, m - 2 + UI.weMonths, 1);
+  let h = `<div class="toolbar"><h1>Réunion du week-end</h1>
+    ${existing.length ? exportBtn('weekend') : ''}
+    ${existing.length ? `<button class="btn" data-act="copy-we">${I.copy}Copier le planning</button>` : ''}</div>
+    <div class="card period">
+      ${fld('Début', `<input type="month" id="we-start" value="${esc(UI.weStart)}" style="width:auto">`)}
+      <div class="fld"><span style="font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Période</span>
+        <div class="seg"><button data-act="we-months" data-m="4" aria-pressed="${UI.weMonths === 4}">4 mois</button><button data-act="we-months" data-m="6" aria-pressed="${UI.weMonths === 6}">6 mois</button></div></div>
+      <div class="muted" style="flex:1;min-width:180px">${cap(MOIS[m - 1])} ${y} → ${MOIS[endM.getMonth()]} ${endM.getFullYear()} · ${dates.length} ${JOURS[S.config.weekendDay]}s · ${existing.filter(d => S.weekend[d].speaker).length} orateur(s) prévu(s)</div>
+      ${missing ? `<button class="btn primary" data-act="we-generate">${I.plus}Préparer ${missing} date${missing > 1 ? 's' : ''}</button>` : ''}
+    </div>
+    <datalist id="sp-list">${sp.map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist>`;
+  if (!existing.length) return h + `<div class="card empty" style="margin-top:14px"><h2>Aucune date préparée pour cette période</h2><p>Choisissez le mois de début et la durée (4 ou 6 mois), puis préparez les dates. Vous pourrez ensuite inscrire l’orateur, son assemblée et le thème de chaque discours.</p></div>`;
+  let curM = -1, open = false;
+  for (const d of dates) {
+    const dt = parseD(d), w = S.weekend[d];
+    if (dt.getMonth() !== curM) { if (open) h += '</div>'; curM = dt.getMonth(); h += `<h3 class="month-h">${MOIS[curM]} ${dt.getFullYear()}</h3><div class="card">`; open = true; }
+    if (!w) { h += `<div style="padding:11px 14px;border-top:1px solid var(--line);flex-wrap:nowrap" class="row"><span class="muted" style="flex:1;min-width:0">${fmtLong(dt)} — pas encore préparé</span><button class="btn sm" data-act="we-add" data-d="${d}">Préparer</button></div>`; continue; }
+    const rep = w.talkNo && (talks[w.talkNo] || []).filter(k => k !== d && Math.abs(parseD(k) - dt) < 365 * 864e5);
+    const ev = { assemblee: 'Assemblée', visite: 'Visite du RC', special: 'Discours spécial', memorial: 'Mémorial' }[w.event];
+    h += `<details class="we" data-d="${d}"${UI.openWE.has(d) ? ' open' : ''}><summary>
+      <div class="datebox"><small>${JOURS[dt.getDay()].slice(0, 3)}</small><b>${dt.getDate()}</b></div>
+      <div class="we-sum"><div class="theme">${w.talkNo ? `<span class="no">n° ${esc(w.talkNo)}</span>` : ''}${esc(w.theme) || (ev ? '' : '<span class="todo">Thème à préciser</span>')}${ev ? ` <span class="chip acc">${ev}</span>` : ''}</div>
+        <div class="sp">${w.speaker ? esc(w.speaker) + (w.speakerCong ? ' · ' + esc(w.speakerCong) : '') : '<span class="todo">Orateur à trouver</span>'}</div></div>
+      <div class="row">${w.event === 'assemblee' || (w.speaker && w.theme && w.chairman && w.conductor && w.reader) ? '<span class="chip ok">Complet</span>' : ''}${rep && rep.length ? `<span class="chip warn" title="Déjà prévu le ${rep.map(k => fmtD(parseD(k))).join(', ')}">n° répété</span>` : ''}${w.example ? '<span class="chip ex">exemple</span>' : ''}</div>
+    </summary><div class="we-body">
+      ${fld('Orateur', `<input type="text" list="sp-list" data-we="${d}" data-f="speaker" value="${esc(w.speaker)}" placeholder="Nom de l’orateur">`)}
+      ${fld('Assemblée d’origine', `<input type="text" data-we="${d}" data-f="speakerCong" value="${esc(w.speakerCong)}">`)}
+      ${fld('N° du discours', `<input type="text" inputmode="numeric" data-we="${d}" data-f="talkNo" value="${esc(w.talkNo)}">`)}
+      ${fld('Type', `<select data-we="${d}" data-f="event"><option value="">Normal</option>${[['visite','Visite du RC'],['special','Discours spécial'],['assemblee','Assemblée (pas de réunion)'],['memorial','Mémorial']].map(([v, l]) => `<option value="${v}"${w.event === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`)}
+      ${fld('Thème du discours', `<input type="text" data-we="${d}" data-f="theme" value="${esc(w.theme)}">`, 'wide')}
+      ${fld('Président', personSelect('chairman', w.chairman, 'presidentWE', { ref: d }).replace('<select', `<select data-we="${d}"`))}
+      ${fld('Conducteur Tour de Garde', personSelect('conductor', w.conductor, 'conducteurTG', { ref: d }).replace('<select', `<select data-we="${d}"`))}
+      ${fld('Lecteur Tour de Garde', personSelect('reader', w.reader, 'lecteur', { ref: d }).replace('<select', `<select data-we="${d}"`))}
+      ${fld('Prière finale', personSelect('prayer', w.prayer, 'priere', { ref: d }).replace('<select', `<select data-we="${d}"`))}
+      ${fld('Cantiques', `<div class="row" style="flex-wrap:nowrap"><input type="text" inputmode="numeric" class="num" data-we="${d}" data-f="songOpen" value="${esc(w.songOpen)}" placeholder="1er" aria-label="Premier cantique"><input type="text" inputmode="numeric" class="num" data-we="${d}" data-f="songMid" value="${esc(w.songMid)}" placeholder="2e" aria-label="Deuxième cantique"><input type="text" inputmode="numeric" class="num" data-we="${d}" data-f="songClose" value="${esc(w.songClose)}" placeholder="3e" aria-label="Dernier cantique"></div>`)}
+      ${fld('Notes (accueil, repas, transport…)', `<input type="text" data-we="${d}" data-f="note" value="${esc(w.note)}">`, 'wide')}
+      <div class="acts"><button class="btn primary sm" data-act="timer-we" data-d="${d}">${I.timer}Chronomètre</button><button class="btn sm" data-act="msg-we" data-d="${d}">${I.chat}Messages</button><span class="spacer"></span>
+        ${UI.confirm === 'we-' + d ? `<button class="btn sm danger" data-act="we-del-yes" data-d="${d}">Confirmer</button><button class="btn sm" data-act="cancel">Annuler</button>` : `<button class="btn sm ghost danger" data-act="we-del" data-d="${d}">Retirer cette date</button>`}</div>
+    </div></details>`;
+  }
+  if (open) h += '</div>';
+  return h;
+}
+function weItems(d){
+  const w = S.weekend[d], P = id => pname(id) || '—';
+  return [
+    { sec: 'intro', label: `Cantique ${w.songOpen || ''} et prière`.replace('  ', ' '), who: P(w.chairman), min: 5 },
+    { sec: 'intro', label: 'Accueil du président', who: P(w.chairman), min: 2 },
+    { sec: 'joyaux', label: `Discours public${w.talkNo ? ' n° ' + w.talkNo : ''}`, who: (w.speaker || '—') + (w.theme ? ' · ' + w.theme : ''), min: 30 },
+    { sec: 'vie', label: `Cantique ${w.songMid || ''}`.trim(), who: '', min: 3 },
+    { sec: 'ministere', label: 'Étude de La Tour de Garde', who: `${P(w.conductor)} · lecteur : ${P(w.reader)}`, min: 60 },
+    { sec: 'fin', label: `Cantique ${w.songClose || ''} et prière`.replace('  ', ' '), who: P(w.prayer), min: 5 }
+  ];
+}
+function weText(){
+  const P = id => pname(id) || '—';
+  let t = `*${S.config.congregation} — Discours publics*\n`;
+  for (const d of weDates()) { const w = S.weekend[d]; if (!w) continue;
+    t += `\n${fmtLong(parseD(d))}\n`;
+    if (w.event === 'assemblee') { t += 'Assemblée : pas de réunion\n'; continue; }
+    t += `${w.talkNo ? 'n° ' + w.talkNo + ' — ' : ''}${w.theme || 'Thème à préciser'}\nOrateur : ${w.speaker || 'à trouver'}${w.speakerCong ? ' (' + w.speakerCong + ')' : ''}\nPrésident : ${P(w.chairman)} · Lecteur TG : ${P(w.reader)}\n`;
+  }
+  return t;
+}
+
+/* ----- Proclamateurs ----- */
+const initials = n => (n || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+function personChips(p){
+  const c = [];
+  if (p.privilege === 'ancien') c.push('<span class="chip acc">Ancien</span>');
+  if (p.privilege === 'assistant') c.push('<span class="chip acc">Assistant ministériel</span>');
+  if (p.student) c.push('<span class="chip">Élève</span>');
+  if (p.baptized === false) c.push('<span class="chip">Non baptisé</span>');
+  if (p.example) c.push('<span class="chip ex">exemple</span>');
+  return c.join('');
+}
+function viewPeople(){
+  const all = Object.entries(S.people).map(([id, p]) => ({ id, ...p })).sort(byName);
+  const F = { tous: () => true, freres: p => p.sex === 'H', soeurs: p => p.sex === 'F', eleves: p => p.student, anciens: p => p.privilege === 'ancien' || p.privilege === 'assistant' };
+  const s = UI.search.trim().toLowerCase();
+  const list = all.filter(F[UI.peopleFilter]).filter(p => !s || (p.name || '').toLowerCase().includes(s));
+  const n = k => all.filter(F[k]).length;
+  let h = `<div class="toolbar"><h1>Proclamateurs et élèves</h1>${all.length ? exportBtn('people') : ''}<button class="btn primary add-desktop" data-act="person-new">${I.plus}Ajouter</button><button class="fab" data-act="person-new" aria-label="Ajouter une personne">${I.plus}</button></div>
+    <div class="filters">${[['tous','Tous'],['freres','Frères'],['soeurs','Sœurs'],['eleves','Élèves'],['anciens','Anciens et assistants']].map(([k, l]) => `<button data-act="pf" data-k="${k}" aria-pressed="${UI.peopleFilter === k}">${l} · ${n(k)}</button>`).join('')}</div>
+    <input type="search" id="p-search" placeholder="Rechercher un nom" value="${esc(UI.search)}" style="margin-bottom:12px">`;
+  if (!all.length) return h + `<div class="card empty"><h2>La liste est vide</h2><p>Ajoutez les proclamateurs et les élèves inscrits à l’école, avec ce que chacun peut recevoir comme attribution (prière, lecture, exposés…). Ils apparaîtront ensuite dans les menus du programme.</p><button class="btn primary" data-act="person-new">${I.plus}Ajouter une personne</button></div>`;
+  h += `<div class="count">${list.length} personne${list.length > 1 ? 's' : ''}</div><div class="card"><ul class="list">`;
+  const ref = iso(today);
+  for (const p of list) {
+    const last = (IDX[p.id] || []).filter(d => d <= iso(addDays(today, 60)));
+    const l = last.length ? last[last.length - 1] : null;
+    h += `<li data-act="person-edit" data-id="${esc(p.id)}" tabindex="0"><span class="avatar ${p.sex === 'F' ? 'f' : ''}">${esc(initials(p.name))}</span>
+      <div class="who"><b>${esc(p.name)}</b><div class="row">${personChips(p)}<span class="muted" style="font-size:12.5px">${(p.quals || []).length} attribution${(p.quals || []).length > 1 ? 's' : ''} possible${(p.quals || []).length > 1 ? 's' : ''}</span></div></div>
+      <div class="last">${l ? (l >= ref ? 'prochaine : ' : 'dernière : ') + fmtD(parseD(l)) : 'aucune attribution'}</div></li>`;
+  }
+  return h + '</ul></div>';
+}
+function suggestQuals(p){
+  const q = new Set(['ministere']);
+  if (p.sex === 'H') { q.add('lecture'); if (p.baptized !== false) { q.add('priere'); q.add('lecteur'); } }
+  if (p.privilege) ['priere','joyaux','perles','vie','lecteur','presidentWE','orateur'].forEach(x => q.add(x));
+  if (p.privilege === 'ancien') ['president','etude','conducteurTG'].forEach(x => q.add(x));
+  if (p.privilege) q.delete('ministere');
+  return [...q];
+}
+function personDialog(id){
+  const p = id ? S.people[id] : { name: '', sex: 'H', baptized: true, privilege: '', student: true, quals: suggestQuals({ sex: 'H', baptized: true }), phone: '', notes: '' };
+  const d = $('#dlg');
+  d.innerHTML = `<form method="dialog" id="pform"><div class="dlg-h"><h2>${id ? 'Modifier' : 'Ajouter une personne'}</h2><button class="icon-btn" value="cancel" aria-label="Fermer">${I.x}</button></div>
+    <div class="dlg-b">
+      ${fld('Nom complet', `<input type="text" id="pf-name" value="${esc(p.name)}" autocomplete="off">`, 'wide')}
+      ${fld('Frère ou sœur', `<select id="pf-sex"><option value="H"${p.sex === 'H' ? ' selected' : ''}>Frère</option><option value="F"${p.sex === 'F' ? ' selected' : ''}>Sœur</option></select>`)}
+      ${fld('Statut', `<select id="pf-bap"><option value="1"${p.baptized !== false ? ' selected' : ''}>Proclamateur baptisé</option><option value="0"${p.baptized === false ? ' selected' : ''}>Proclamateur non baptisé</option></select>`)}
+      ${fld('Privilège', `<select id="pf-priv"><option value="">Aucun</option><option value="assistant"${p.privilege === 'assistant' ? ' selected' : ''}>Assistant ministériel</option><option value="ancien"${p.privilege === 'ancien' ? ' selected' : ''}>Ancien</option></select>`)}
+      ${fld('Téléphone', `<input type="tel" id="pf-phone" value="${esc(p.phone)}">`)}
+      <label class="toggle wide"><input type="checkbox" id="pf-student"${p.student ? ' checked' : ''}> Inscrit à l’école (élève)</label>
+      <fieldset class="wide"><legend>Peut recevoir</legend><div class="checks">
+        ${QUALS.map(([k, l]) => `<label><input type="checkbox" name="q" value="${k}"${(p.quals || []).includes(k) ? ' checked' : ''}> ${l}</label>`).join('')}</div>
+        <button type="button" class="btn sm ghost" id="pf-suggest" style="margin-top:6px">Cocher selon le profil</button></fieldset>
+      ${fld('Notes', `<textarea id="pf-notes" rows="2">${esc(p.notes)}</textarea>`, 'wide')}
+    </div>
+    <div class="dlg-f">${id ? `<button type="button" class="btn ghost danger" id="pf-del">Supprimer</button>` : ''}<span class="spacer"></span>
+      <button class="btn" value="cancel">Annuler</button><button class="btn primary" value="ok" id="pf-ok">Enregistrer</button></div></form>`;
+  const f = $('#pform');
+  $('#pf-suggest').onclick = () => { const s = suggestQuals({ sex: $('#pf-sex').value, baptized: $('#pf-bap').value === '1', privilege: $('#pf-priv').value }); f.querySelectorAll('input[name=q]').forEach(c => c.checked = s.includes(c.value)); };
+  const del = $('#pf-del'); if (del) del.onclick = () => { const p0 = clone(S.people[id]); removeDoc('people', id); d.close(); toast(`${p0.name} supprimé(e)`, () => restore('people', id, p0)); };
+  f.onsubmit = e => {
+    if (e.submitter && e.submitter.value === 'cancel') return;
+    const name = $('#pf-name').value.trim(); if (!name) { e.preventDefault(); $('#pf-name').focus(); return; }
+    const data = { ...(id ? clone(p) : {}), name, sex: $('#pf-sex').value, baptized: $('#pf-bap').value === '1', privilege: $('#pf-priv').value,
+      phone: $('#pf-phone').value.trim(), student: $('#pf-student').checked, notes: $('#pf-notes').value.trim(), quals: [...f.querySelectorAll('input[name=q]:checked')].map(c => c.value) };
+    delete data.example;
+    const nid = id || uid('p'); S.people[nid] = data; persist('people', nid, data, 0); toast(id ? 'Modifications enregistrées' : `${name} ajouté(e)`);
+  };
+  d.onclose = () => render();
+  d.showModal();
+}
+
+/* ----- Orateurs ----- */
+function viewSpeakers(){
+  const list = Object.entries(S.speakers).map(([id, s]) => ({ id, ...s })).sort(byName);
+  const upcoming = {}; Object.entries(S.weekend).forEach(([k, w]) => { if (w.speaker && k >= iso(today)) (upcoming[w.speaker] || (upcoming[w.speaker] = [])).push(k); });
+  let h = `<div class="toolbar"><h1>Orateurs</h1>${list.length ? exportBtn('speakers') : ''}<button class="btn primary add-desktop" data-act="sp-new">${I.plus}Ajouter un orateur</button><button class="fab" data-act="sp-new" aria-label="Ajouter un orateur">${I.plus}</button></div>
+    <p class="muted" style="margin:-6px 0 14px">Carnet des orateurs des autres assemblées. Les frères de votre assemblée cochés « Orateur » dans Proclamateurs sont aussi proposés dans le planning.</p>`;
+  if (!list.length) return h + `<div class="card empty"><h2>Aucun orateur enregistré</h2><p>Ajoutez les orateurs invités avec leur assemblée, leur numéro de téléphone et les discours qu’ils présentent.</p></div>`;
+  h += '<div class="card"><ul class="list">';
+  for (const s of list) {
+    const up = (upcoming[s.name] || []).sort();
+    h += `<li data-act="sp-edit" data-id="${esc(s.id)}" tabindex="0"><span class="avatar">${esc(initials(s.name))}</span>
+      <div class="who"><b>${esc(s.name)}</b><div class="row"><span class="muted" style="font-size:13px">${esc(s.congregation || 'Assemblée non précisée')}${s.talks ? ' · discours ' + esc(s.talks) : ''}</span>${s.example ? '<span class="chip ex">exemple</span>' : ''}</div></div>
+      <div class="last">${up.length ? 'prévu le ' + fmtD(parseD(up[0])) : (s.phone ? esc(s.phone) : '')}</div></li>`;
+  }
+  return h + '</ul></div>';
+}
+function speakerDialog(id){
+  const s = id ? S.speakers[id] : { name: '', congregation: '', phone: '', talks: '' };
+  const d = $('#dlg');
+  d.innerHTML = `<form method="dialog" id="sform"><div class="dlg-h"><h2>${id ? 'Modifier l’orateur' : 'Ajouter un orateur'}</h2><button class="icon-btn" value="cancel" aria-label="Fermer">${I.x}</button></div>
+    <div class="dlg-b">
+      ${fld('Nom', `<input type="text" id="sf-name" value="${esc(s.name)}" autocomplete="off">`, 'wide')}
+      ${fld('Assemblée', `<input type="text" id="sf-cong" value="${esc(s.congregation)}">`)}
+      ${fld('Téléphone', `<input type="tel" id="sf-phone" value="${esc(s.phone)}">`)}
+      ${fld('Discours présentés (numéros)', `<input type="text" id="sf-talks" value="${esc(s.talks)}" placeholder="ex. 12, 45, 101">`, 'wide')}
+    </div>
+    <div class="dlg-f">${id ? `<button type="button" class="btn ghost danger" id="sf-del">Supprimer</button>` : ''}<span class="spacer"></span>
+      <button class="btn" value="cancel">Annuler</button><button class="btn primary" value="ok">Enregistrer</button></div></form>`;
+  const del = $('#sf-del'); if (del) del.onclick = () => { const s0 = clone(S.speakers[id]); removeDoc('speakers', id); d.close(); toast(`${s0.name} supprimé`, () => restore('speakers', id, s0)); };
+  $('#sform').onsubmit = e => {
+    if (e.submitter && e.submitter.value === 'cancel') return;
+    const name = $('#sf-name').value.trim(); if (!name) { e.preventDefault(); return; }
+    const data = { name, congregation: $('#sf-cong').value.trim(), phone: $('#sf-phone').value.trim(), talks: $('#sf-talks').value.trim() };
+    const nid = id || uid('s'); S.speakers[nid] = data; persist('speakers', nid, data, 0); toast('Orateur enregistré');
+  };
+  d.onclose = () => render();
+  d.showModal();
+}
+
+/* ----- Paramètres ----- */
+function settingsDialog(){
+  const c = S.config, d = $('#dlg');
+  const nEx = ['people', 'speakers', 'midweek', 'weekend'].reduce((s, col) => s + Object.values(S[col]).filter(x => x.example).length, 0);
+  const days = (sel, list) => list.map(i => `<option value="${i}"${+sel === i ? ' selected' : ''}>${cap(JOURS[i])}</option>`).join('');
+  d.innerHTML = `<form method="dialog" id="cform"><div class="dlg-h"><h2>Paramètres</h2><button class="icon-btn" value="cancel" aria-label="Fermer">${I.x}</button></div>
+    <div class="dlg-b">
+      ${fld('Nom de l’assemblée', `<input type="text" id="cf-name" value="${esc(c.congregation)}">`, 'wide')}
+      ${fld('Jour de la réunion de semaine', `<select id="cf-md">${days(c.midweekDay, [1, 2, 3, 4, 5])}</select>`)}
+      ${fld('Heure', `<input type="time" id="cf-mt" value="${esc(c.midweekTime)}">`)}
+      ${fld('Jour de la réunion du week-end', `<select id="cf-wd">${days(c.weekendDay, [6, 0])}</select>`)}
+      ${fld('Heure', `<input type="time" id="cf-wt" value="${esc(c.weekendTime)}">`)}
+      <label class="toggle wide"><input type="checkbox" id="cf-aux"${c.aux ? ' checked' : ''}> Classe auxiliaire (deuxième salle pour les exposés)</label>
+      <label class="toggle wide"><input type="checkbox" id="cf-beep"${lsGet('vcm-beep') !== false ? ' checked' : ''}> Bip sonore quand le temps d’une partie est écoulé</label>
+      ${nEx ? `<div class="wide banner" style="margin:0"><span>${nEx} élément(s) d’exemple sont affichés pour la démonstration.</span><span class="spacer"></span><button type="button" class="btn sm danger" id="cf-ex">Supprimer les exemples</button></div>` : ''}
+      <fieldset class="wide"><legend>Sauvegarde</legend>
+        <div class="row">${DL ? `<button type="button" class="btn sm" id="cf-backup">${I.dl}Télécharger une sauvegarde</button>` : ''}
+          <label class="btn sm" for="cf-file">Restaurer une sauvegarde</label><input type="file" id="cf-file" accept=".json,application/json" hidden></div>
+        <p class="muted" id="cf-msg" style="margin:8px 0 0;font-size:13px">Un fichier qui contient tout : proclamateurs, orateurs, programmes et réglages. Il sert à garder une copie de sécurité ou à passer vers l’application installée sur un autre appareil.</p></fieldset>
+      ${!window.claude && !isStandalone() && isIOS() ? `<div class="wide banner" style="margin:0"><span>Pour installer l’application sur iPhone : touchez <b>Partager</b>, puis <b>Sur l’écran d’accueil</b>.</span></div>` : ''}
+    </div>
+    <div class="dlg-f"><span class="spacer"></span><button class="btn" value="cancel">Annuler</button><button class="btn primary" value="ok">Enregistrer</button></div></form>`;
+  const bk = $('#cf-backup'); if (bk) bk.onclick = () => backupData();
+  $('#cf-file').onchange = async e => {
+    const f = e.target.files[0], msg = $('#cf-msg'); if (!f) return;
+    let data; try { data = JSON.parse(await f.text()); } catch { data = null; }
+    if (!data || data.app !== 'programme-reunions') { msg.textContent = 'Ce fichier n’est pas une sauvegarde de cette application.'; return; }
+    const c = k => Object.keys(data[k] || {}).length;
+    msg.innerHTML = `Sauvegarde du ${esc(new Date(data.exportedAt).toLocaleDateString('fr-FR'))} : ${c('people')} personnes, ${c('midweek')} semaines, ${c('weekend')} dates du week-end, ${c('speakers')} orateurs.<br><b>Les données actuelles seront remplacées.</b> <button type="button" class="btn sm danger" id="cf-restore">Remplacer par la sauvegarde</button>`;
+    $('#cf-restore').onclick = async () => { $('#cf-restore').disabled = true; msg.querySelector('b').textContent = 'Restauration en cours…'; const ok = await restoreAll(data); d.close(); if (ok) toast('Sauvegarde restaurée'); };
+  };
+  const ex = $('#cf-ex'); if (ex) ex.onclick = () => {
+    if (!ex.dataset.c) { ex.dataset.c = 1; ex.textContent = 'Confirmer'; return; }
+    ['people', 'speakers', 'midweek', 'weekend'].forEach(col => Object.entries(S[col]).forEach(([id, x]) => { if (x.example) removeDoc(col, id); }));
+    d.close(); toast('Exemples supprimés');
+  };
+  $('#cform').onsubmit = e => {
+    if (e.submitter && e.submitter.value === 'cancel') return;
+    lsSet('vcm-beep', $('#cf-beep').checked);
+    setConfig(x => { x.congregation = $('#cf-name').value.trim() || 'Mon assemblée'; x.midweekDay = +$('#cf-md').value; x.midweekTime = $('#cf-mt').value; x.weekendDay = +$('#cf-wd').value; x.weekendTime = $('#cf-wt').value; x.aux = $('#cf-aux').checked; });
+  };
+  d.onclose = () => render();
+  d.showModal();
+}
+
+/* ----- Copier ----- */
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); toast('Copié : collez-le dans WhatsApp ou un SMS'); return; } catch {}
+  const d = $('#dlg');
+  d.innerHTML = `<form method="dialog"><div class="dlg-h"><h2>Texte à copier</h2><button class="icon-btn" value="x" aria-label="Fermer">${I.x}</button></div>
+    <div class="dlg-b" style="grid-template-columns:1fr"><p class="muted" style="margin:0">Le texte est sélectionné : utilisez Copier sur votre appareil.</p><textarea id="cp-t" rows="14" readonly>${esc(text)}</textarea></div>
+    <div class="dlg-f"><span class="spacer"></span><button class="btn primary" value="x">Fermer</button></div></form>`;
+  d.onclose = () => render(); d.showModal(); const t = $('#cp-t'); t.focus(); t.select();
+}
+
+/* ---------- Événements ---------- */
+const main = $('#main');
+main.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, key = UI.week;
+  if (a !== 'cancel' && !a.endsWith('-yes')) UI.confirm = null;
+  switch (a) {
+    case 'wk-prev': UI.week = iso(addDays(parseD(key), -7)); UI.anim = -1; break;
+    case 'wk-next': UI.week = iso(addDays(parseD(key), 7)); UI.anim = 1; break;
+    case 'wk-today': { const t = nextMeetingWeek(); UI.anim = t > key ? 1 : -1; UI.week = t; break; }
+    case 'goto-unset': { const s = main.querySelector('select.unset'); if (s) { s.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => s.focus({ preventScroll: true }), 350); } return; }
+    case 'wk-create': if (!S.canWrite) return; S.midweek[key] = templateWeek(key); persist('midweek', key, S.midweek[key], 0); break;
+    case 'wk-copyprev': { if (!S.canWrite) return; const p = S.midweek[iso(addDays(parseD(key), -7))]; const w = templateWeek(key);
+      w.parts = p.parts.map(x => ({ id: uid('x'), sec: x.sec, kind: x.kind, solo: !!x.solo, q: x.q, title: x.title, min: x.min })); S.midweek[key] = w; persist('midweek', key, w, 0); break; }
+    case 'wk-delete': { const w0 = clone(S.midweek[key]); removeDoc('midweek', key); toast('Semaine supprimée', () => restore('midweek', key, w0)); break; }
+    case 'wk-delete-yes': UI.confirm = null; removeDoc('midweek', key); toast('Semaine supprimée'); break;
+    case 'cancel': UI.confirm = null; break;
+    case 'part-add': edit('midweek', key, w => { const np = newPart(b.dataset.sec); const idx = w.parts.map(p => p.sec).lastIndexOf(b.dataset.sec);
+      const order = ['joyaux', 'ministere', 'vie']; let at = idx >= 0 ? idx + 1 : w.parts.findIndex(p => order.indexOf(p.sec) > order.indexOf(b.dataset.sec)); if (at < 0) at = w.parts.length; w.parts.splice(at, 0, np); }, 0); break;
+    case 'part-del': { const w0 = clone(S.midweek[key]); const gone = w0.parts.find(p => p.id === b.dataset.part);
+      edit('midweek', key, w => { w.parts = w.parts.filter(p => p.id !== b.dataset.part); }, 0);
+      toast(`« ${gone ? gone.title : 'Partie'} » supprimée`, () => restore('midweek', key, w0)); break; }
+    case 'part-up': case 'part-down': edit('midweek', key, w => {
+      const i = w.parts.findIndex(p => p.id === b.dataset.part), sec = w.parts[i].sec, dir = a === 'part-up' ? -1 : 1;
+      let j = i + dir; while (j >= 0 && j < w.parts.length && w.parts[j].sec !== sec) j += dir;
+      if (j >= 0 && j < w.parts.length) [w.parts[i], w.parts[j]] = [w.parts[j], w.parts[i]]; }, 0); break;
+    case 'export': exportDialog(b.dataset.what); return;
+    case 'msg-week': messagesDialog(`Messages · ${weekLabel(key)}`, weekMessages(key)); return;
+    case 'msg-we': messagesDialog(`Messages · ${fmtLong(parseD(b.dataset.d))}`, weekendMessages(b.dataset.d)); return;
+    case 'copy-week': copyText(weekText(key)); return;
+    case 'timer-week': openTimer(`Réunion de semaine · ${weekLabel(key)}`, midweekItems(S.midweek[key])); return;
+    case 'we-months': UI.weMonths = +b.dataset.m; lsSet('vcm-we-months', UI.weMonths); break;
+    case 'we-generate': if (!S.canWrite) return; weDates().forEach(d => { if (!S.weekend[d]) { S.weekend[d] = { date: d }; persist('weekend', d, S.weekend[d], 0); } }); toast('Dates préparées'); break;
+    case 'we-add': if (!S.canWrite) return; S.weekend[b.dataset.d] = { date: b.dataset.d }; persist('weekend', b.dataset.d, S.weekend[b.dataset.d], 0); UI.openWE.add(b.dataset.d); break;
+    case 'we-del': { const d0 = b.dataset.d, w0 = clone(S.weekend[d0]); removeDoc('weekend', d0); toast(`${fmtLong(parseD(d0))} retiré`, () => restore('weekend', d0, w0)); break; }
+    case 'we-del-yes': UI.confirm = null; removeDoc('weekend', b.dataset.d); break;
+    case 'copy-we': copyText(weText()); return;
+    case 'timer-we': openTimer(`Réunion du week-end · ${fmtLong(parseD(b.dataset.d))}`, weItems(b.dataset.d)); return;
+    case 'pf': UI.peopleFilter = b.dataset.k; break;
+    case 'person-new': personDialog(null); return;
+    case 'person-edit': personDialog(b.dataset.id); return;
+    case 'sp-new': speakerDialog(null); return;
+    case 'sp-edit': speakerDialog(b.dataset.id); return;
+    default: return;
+  }
+  render();
+});
+main.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('li[data-act]')) e.target.click(); });
+main.addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.we')) { d.open ? UI.openWE.add(d.dataset.d) : UI.openWE.delete(d.dataset.d); } }, true);
+
+function applyField(el, rerender){
+  const f = el.dataset.f; if (!f) return;
+  if (el.id === 'we-start') return;
+  let v = el.value;
+  if (el.dataset.we) {
+    const d = el.dataset.we;
+    edit('weekend', d, w => {
+      w[f] = v;
+      if (f === 'speaker') { const sp = Object.values(S.speakers).find(s => s.name === v); if (sp && !w.speakerCong) w.speakerCong = sp.congregation || ''; }
+    }, rerender ? 0 : 700);
+    return;
+  }
+  if (UI.tab !== 'semaine' || !S.midweek[UI.week]) return;
+  edit('midweek', UI.week, w => {
+    if (el.dataset.part) { const p = w.parts.find(x => x.id === el.dataset.part); if (!p) return;
+      if (f === 'min') v = Math.max(0, Math.min(90, parseInt(v, 10) || 0));
+      if (f === 'solo') { v = v === '1'; if (v) { p.b = ''; p.auxB = ''; } }
+      if (f === 'kind') { p.q = v === 'study' ? 'etude' : 'vie'; p.b = ''; }
+      p[f] = v; }
+    else w[f] = v;
+  }, rerender ? 0 : 700);
+}
+main.addEventListener('input', e => { if (e.target.matches('input[type=text],input[type=number],textarea')) applyField(e.target, false); if (e.target.id === 'p-search') { UI.search = e.target.value; const pos = e.target.selectionStart; render(); const s = $('#p-search'); s.focus(); s.setSelectionRange(pos, pos); } });
+main.addEventListener('change', e => {
+  if (e.target.classList.contains('cal-pick')) { if (e.target.value) { const k = iso(monday(parseD(e.target.value))); UI.anim = k > UI.week ? 1 : -1; UI.week = k; render(); } return; }
+  if (e.target.id === 'we-start') { if (e.target.value) { UI.weStart = e.target.value; lsSet('vcm-we-start', UI.weStart); } render(); return; }
+  if (e.target.matches('select')) { applyField(e.target, true); render(); }
+  else if (e.target.matches('input[type=number]')) render();
+});
+$('#openSettings').onclick = settingsDialog;
+$('#installBtn').onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch {} installEvt = null; $('#installBtn').hidden = true; };
+main.addEventListener('click', e => { if (e.target.classList && e.target.classList.contains('cal-pick')) { try { e.target.showPicker(); } catch {} } });
+
+/* Glisser à gauche / à droite pour changer de semaine */
+let swipe = null;
+main.addEventListener('touchstart', e => {
+  swipe = null;
+  if (UI.tab !== 'semaine' || e.touches.length !== 1 || e.target.closest('input,select,textarea,button,dialog')) return;
+  swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
+}, { passive: true });
+main.addEventListener('touchend', e => {
+  if (!swipe) return;
+  const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, quick = Date.now() - swipe.t < 700; swipe = null;
+  if (!quick || Math.abs(dx) < 70 || Math.abs(dy) > 50) return;
+  const dir = dx < 0 ? 1 : -1; UI.week = iso(addDays(parseD(UI.week), 7 * dir)); UI.anim = dir; render();
+}, { passive: true });
+
+function route(){ const h = location.hash.replace('#', ''); UI.tab = ['semaine', 'weekend', 'proclamateurs', 'orateurs'].includes(h) ? h : 'semaine'; UI.confirm = null; UI.anim = 'fade'; render(); window.scrollTo(0, 0); }
+window.addEventListener('hashchange', route);
+document.querySelectorAll('nav.tabs a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); if (location.hash !== '#' + a.dataset.tab) location.hash = a.dataset.tab; else route(); }));
+
+/* ---------- Chronomètre ---------- */
+const T = { items: [], idx: 0, acc: [], runStart: null, beeped: new Set(), tick: null, lock: null };
+const tEl = (i = T.idx) => T.acc[i] + (i === T.idx && T.runStart ? (Date.now() - T.runStart) / 1000 : 0);
+let audio = null;
+function beep(){
+  if (lsGet('vcm-beep') === false) return;
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); [0, .25].forEach(t => { const o = audio.createOscillator(), g = audio.createGain(); o.frequency.value = 880; o.connect(g); g.connect(audio.destination); g.gain.setValueAtTime(.25, audio.currentTime + t); g.gain.exponentialRampToValueAtTime(.001, audio.currentTime + t + .2); o.start(audio.currentTime + t); o.stop(audio.currentTime + t + .21); }); } catch {}
+}
+function openTimer(title, items){
+  T.items = items; T.idx = 0; T.acc = items.map(() => 0); T.runStart = null; T.beeped = new Set(); T.title = title;
+  const r = $('#timerRoot');
+  r.innerHTML = `<div class="timer" role="dialog" aria-label="Chronomètre"><div class="timer-h"><h2>${esc(title)}</h2>${document.fullscreenEnabled ? '<button class="btn ghost" id="t-fs">Plein écran</button>' : ''}<button class="btn" id="t-close">Fermer</button></div>
+    <div class="timer-body"><div class="clock" id="t-clock">
+      <div class="sec-tag" id="t-sec"></div><div class="ptitle" id="t-title"></div><div class="pwho" id="t-who"></div>
+      <div class="digits" id="t-digits">0:00</div><div class="remain" id="t-remain"></div><div class="bar"><i id="t-bar"></i></div>
+      <div class="upnext" id="t-upnext"></div>
+      <div class="ctrl"><button class="btn" id="t-prev" aria-label="Partie précédente">${I.prev}</button>
+        <button class="btn primary" id="t-play">${I.play}Démarrer</button>
+        <button class="btn" id="t-next">${I.next2}Partie suivante</button>
+        <button class="btn ghost" id="t-reset" title="Remettre cette partie à zéro">${I.reset}Remettre à zéro</button></div>
+    </div><div class="tlist"><div class="total"><span>Écoulé <b id="t-tot">0:00</b></span><span>Prévu <b>${hm(items.reduce((s, x) => s + x.min * 60, 0))}</b></span><span id="t-delta"></span></div><ol id="t-list"></ol></div></div></div>`;
+  document.body.style.overflow = 'hidden';
+  $('#t-close').onclick = closeTimer;
+  const fs = $('#t-fs'); if (fs) fs.onclick = () => {
+    if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); fs.textContent = 'Plein écran'; }
+    else $('.timer').requestFullscreen().then(() => fs.textContent = 'Quitter le plein écran').catch(() => toast('Le plein écran n’est pas disponible ici.'));
+  };
+  $('#t-play').onclick = () => { T.runStart ? pauseT() : startT(); };
+  $('#t-next').onclick = () => gotoT(Math.min(T.idx + 1, T.items.length - 1), true);
+  $('#t-prev').onclick = () => gotoT(Math.max(T.idx - 1, 0), !!T.runStart);
+  $('#t-reset').onclick = () => { T.acc[T.idx] = 0; if (T.runStart) T.runStart = Date.now(); T.beeped.delete(T.idx); paintT(true); };
+  $('#t-list').onclick = e => { const li = e.target.closest('li'); if (li) gotoT(+li.dataset.i, !!T.runStart); };
+  try { navigator.wakeLock && navigator.wakeLock.request('screen').then(l => T.lock = l).catch(() => {}); } catch {}
+  paintT(true); T.tick = setInterval(() => paintT(false), 250);
+}
+function closeTimer(){ if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); pauseT(); clearInterval(T.tick); $('#timerRoot').innerHTML = ''; document.body.style.overflow = ''; try { T.lock && T.lock.release(); } catch {} T.lock = null; }
+function startT(){ T.runStart = Date.now(); try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); } catch {} paintT(true); }
+function pauseT(){ if (T.runStart) { T.acc[T.idx] += (Date.now() - T.runStart) / 1000; T.runStart = null; } if ($('#t-play')) paintT(true); }
+function gotoT(i, run){ pauseT(); T.idx = i; if (run) startT(); paintT(true); }
+function paintT(full){
+  if (!$('#t-digits')) return;
+  const it = T.items[T.idx], el = tEl(), plan = it.min * 60, rem = plan - el;
+  if (plan > 0 && rem <= 0 && !T.beeped.has(T.idx) && T.runStart) { T.beeped.add(T.idx); beep(); }
+  $('#t-digits').textContent = mmss(el);
+  $('#t-remain').textContent = plan ? (rem >= 0 ? `reste ${mmss(rem)} sur ${it.min} min` : `dépassement +${mmss(rem)}`) : '';
+  $('#t-bar').style.width = plan ? Math.min(100, el / plan * 100) + '%' : '0';
+  $('#t-clock').className = 'clock' + (plan && rem < 0 ? ' over' : plan && rem <= 30 && el > 0 ? ' amber' : '');
+  const tot = T.items.reduce((s, _, i) => s + tEl(i), 0);
+  const planDone = T.items.slice(0, T.idx).reduce((s, x) => s + x.min * 60, 0) + Math.min(el, plan);
+  const usedDone = T.items.slice(0, T.idx).reduce((s, _, i) => s + tEl(i), 0) + el;
+  const delta = usedDone - planDone;
+  $('#t-tot').textContent = mmss(tot);
+  $('#t-delta').innerHTML = Math.abs(delta) < 5 ? '<b style="color:var(--ok)">À l’heure</b>' : delta > 0 ? `Retard <b style="color:var(--bad)">${mmss(delta)}</b>` : `Avance <b style="color:var(--ok)">${mmss(delta)}</b>`;
+  if (full) {
+    const secName = { joyaux: SECTIONS.joyaux, ministere: SECTIONS.ministere, vie: SECTIONS.vie, intro: 'Ouverture', fin: 'Conclusion' };
+    $('#t-sec').textContent = T.title.startsWith('Réunion du week-end') ? `Partie ${T.idx + 1} sur ${T.items.length}` : `${secName[it.sec] || ''} · partie ${T.idx + 1} sur ${T.items.length}`;
+    $('#t-title').textContent = it.label; $('#t-who').textContent = it.who || '';
+    $('#t-play').innerHTML = T.runStart ? `${I.pause}Pause` : `${I.play}${T.acc[T.idx] ? 'Reprendre' : 'Démarrer'}`;
+    $('#t-next').disabled = T.idx === T.items.length - 1;
+    const nx = T.items[T.idx + 1];
+    $('#t-upnext').innerHTML = nx ? `Ensuite : <b>${esc(nx.label)}</b>${nx.who ? ' · ' + esc(nx.who) : ''} · ${nx.min} min` : 'Dernière partie de la réunion';
+  }
+  $('#t-list').innerHTML = T.items.map((x, i) => { const u = tEl(i), done = u > 0;
+    return `<li data-i="${i}" class="s-${x.sec}${i === T.idx ? ' cur' : ''}"><span class="t">${esc(x.label)}</span><span class="w">${esc(x.who || '')}</span>
+      <span class="d">${done ? `<span class="${u > x.min * 60 + 2 ? 'late' : 'fine'}">${mmss(u)}</span> / ` : ''}${x.min} min</span></li>`; }).join('');
+  if (full) { const cur = $('#t-list .cur'); cur && cur.scrollIntoView({ block: 'nearest' }); }
+}
+document.addEventListener('keydown', e => { if (!$('#t-digits') || e.target.matches('input,select,textarea')) return; if (e.code === 'Space') { e.preventDefault(); $('#t-play').click(); } if (e.key === 'ArrowRight') $('#t-next').click(); if (e.key === 'Escape') closeTimer(); });
+
+/* ---------- Export Excel / PDF ---------- */
+const LIBS = {
+  xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  jspdf: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  autotable: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js'
+};
+const libP = {};
+const loadLib = k => libP[k] || (libP[k] = new Promise((res, rej) => { const s = document.createElement('script'); s.src = LIBS[k]; s.onload = res; s.onerror = () => { delete libP[k]; rej(new Error('lib')); }; document.head.appendChild(s); }));
+const SEC_RGB = { joyaux: [61, 108, 120], ministere: [169, 119, 22], vie: [138, 42, 42], neutral: [222, 228, 224] };
+
+/* Un rapport = { title, file, landscape, blocks:[{heading, sub, head, rows}], sheets:[{name, head, rows}] }
+   Dans rows (PDF), un objet {sec, text} est une ligne de section colorée. */
+function reportWeek(nWeeks){
+  const keys = []; for (let i = 0; i < nWeeks; i++) { const k = iso(addDays(parseD(UI.week), 7 * i)); if (S.midweek[k]) keys.push(k); }
+  const P = id => pname(id) || '—', aux = S.config.aux;
+  const head = ['N°', 'Partie', 'Durée', 'Attribué à', 'Interlocuteur / lecteur'].concat(aux ? ['Classe auxiliaire'] : []);
+  const blocks = [], xrows = [];
+  for (const k of keys) {
+    const w = S.midweek[k], md = meetingDate(k), rows = [];
+    const line = (sec, n, title, min, a, b, x) => { rows.push([n, title, min ? min + ' min' : '', a, b].concat(aux ? [x || ''] : []));
+      xrows.push([weekLabel(k), fmtLong(md), sec, n, title, min || '', a, b].concat(aux ? [x || ''] : [])); };
+    if (w.event === 'assemblee') { rows.push({ sec: 'neutral', text: 'Semaine d’assemblée : pas de réunion' }); xrows.push([weekLabel(k), fmtLong(md), 'Assemblée', '', 'Pas de réunion', '', '', '']); }
+    else {
+      line('Ouverture', '', `Cantique ${w.songOpen || '…'} et prière`, 5, P(w.prayerOpen), '');
+      line('Ouverture', '', 'Paroles d’introduction', 1, P(w.chairman), '');
+      let n = 0;
+      for (const sec of ['joyaux', 'ministere', 'vie']) {
+        rows.push({ sec, text: SECTIONS[sec].toUpperCase() });
+        if (sec === 'vie') line(SECTIONS[sec], '', `Cantique ${w.songMid || '…'}`, 3, '', '');
+        for (const p of (w.parts || []).filter(x => x.sec === sec)) {
+          n++;
+          const b = p.kind === 'study' ? 'Lecteur : ' + P(p.b) : p.kind === 'student' && !p.solo ? P(p.b) : '';
+          const x = aux && p.kind === 'student' ? P(p.auxA) + (p.solo ? '' : ' / ' + P(p.auxB)) : '';
+          line(SECTIONS[sec], n, p.title, p.min, P(p.a), b, x);
+        }
+      }
+      rows.push({ sec: 'neutral', text: 'CONCLUSION' });
+      line('Conclusion', '', 'Paroles de conclusion', 3, P(w.chairman), '');
+      line('Conclusion', '', `Cantique ${w.songClose || '…'} et prière`, 5, P(w.prayerClose), '');
+    }
+    blocks.push({ heading: `Semaine du ${weekLabel(k)}${w.label ? ' · ' + w.label : ''}`, sub: `${fmtLong(md)} à ${S.config.midweekTime} · Président : ${P(w.chairman)}${aux && w.auxCounselor ? ' · Conseiller classe aux. : ' + P(w.auxCounselor) : ''}`, head, rows });
+  }
+  const span = keys.length > 1 ? `${weekLabel(keys[0]).split(' ').slice(0, 2).join(' ')} au ${weekLabel(keys[keys.length - 1])}` : keys[0] ? weekLabel(keys[0]) : '';
+  return { title: 'Réunion Vie et ministère', period: span, file: `Reunion de semaine ${span}`, empty: !keys.length, blocks,
+    sheets: [{ name: 'Réunion de semaine', head: ['Semaine', 'Date', 'Section', 'N°', 'Partie', 'Durée (min)', 'Attribué à', 'Interlocuteur / lecteur'].concat(aux ? ['Classe auxiliaire'] : []), rows: xrows }] };
+}
+function reportWeekend(){
+  const P = id => pname(id) || '';
+  const head = ['Date', 'N°', 'Thème', 'Orateur', 'Assemblée', 'Président', 'Conducteur TG', 'Lecteur TG', 'Prière'];
+  const rows = weDates().map(d => { const w = S.weekend[d] || { theme: 'À prévoir' }, ev = { assemblee: 'Assemblée : pas de réunion', visite: 'Visite du RC', special: 'Discours spécial', memorial: 'Mémorial' }[w.event];
+    return [fmtLong(parseD(d)), w.talkNo || '', [w.theme, ev].filter(Boolean).join(' · '), w.speaker || '', w.speakerCong || '', P(w.chairman), P(w.conductor), P(w.reader), P(w.prayer)]; });
+  const [y, m] = UI.weStart.split('-').map(Number), endM = new Date(y, m - 2 + UI.weMonths, 1);
+  const period = `${cap(MOIS[m - 1])} ${y} à ${MOIS[endM.getMonth()]} ${endM.getFullYear()}`;
+  return { title: 'Discours publics et réunion du week-end', period, file: `Planning week-end ${period}`, landscape: true, empty: !rows.length,
+    blocks: [{ head, rows }], sheets: [{ name: 'Week-end', head, rows }] };
+}
+function reportPeople(){
+  const head = ['Nom', 'Frère / sœur', 'Statut', 'Privilège', 'Élève', 'Téléphone', 'Peut recevoir', 'Dernière attribution'];
+  const ql = Object.fromEntries(QUALS);
+  const rows = Object.entries(S.people).map(([id, p]) => ({ id, ...p })).sort(byName).map(p => { const l = lastBefore(p.id, '9999-12-31');
+    return [p.name, p.sex === 'F' ? 'Sœur' : 'Frère', p.baptized === false ? 'Non baptisé' : 'Baptisé', p.privilege === 'ancien' ? 'Ancien' : p.privilege === 'assistant' ? 'Assistant ministériel' : '', p.student ? 'Oui' : '', p.phone || '', (p.quals || []).map(q => ql[q]).join(', '), l ? fmtD(parseD(l)) + ' ' + l.slice(0, 4) : '']; });
+  return { title: 'Proclamateurs et élèves', period: `${rows.length} personnes`, file: 'Proclamateurs et eleves', landscape: true, empty: !rows.length, blocks: [{ head, rows }], sheets: [{ name: 'Proclamateurs', head, rows }] };
+}
+function reportSpeakers(){
+  const head = ['Nom', 'Assemblée', 'Téléphone', 'Discours présentés', 'Prochaine visite'];
+  const next = {}; Object.entries(S.weekend).sort().forEach(([k, w]) => { if (w.speaker && k >= iso(today) && !next[w.speaker]) next[w.speaker] = k; });
+  const rows = Object.values(S.speakers).sort(byName).map(s => [s.name, s.congregation || '', s.phone || '', s.talks || '', next[s.name] ? fmtLong(parseD(next[s.name])) : '']);
+  return { title: 'Carnet des orateurs', period: `${rows.length} orateurs`, file: 'Orateurs', empty: !rows.length, blocks: [{ head, rows }], sheets: [{ name: 'Orateurs', head, rows }] };
+}
+
+async function saveFile(filename, data){
+  if (!DL) { toast('L’export n’est pas disponible dans cette vue.'); return false; }
+  try { await DL.save({ filename, data }); toast('Fichier enregistré'); return true; }
+  catch (e) {
+    const c = e && e.code;
+    if (c === 'declined') toast('Téléchargement annulé');
+    else if (c === 'rate_limited') toast('Une demande est déjà ouverte. Réessayez dans un instant.');
+    else toast('Ce format n’est pas disponible ici.');
+    return false;
+  }
+}
+const safeName = s => s.replace(/[\\/:*?"<>|]/g, '-').replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
+async function toExcel(r){
+  await loadLib('xlsx');
+  const wb = XLSX.utils.book_new();
+  for (const sh of r.sheets) {
+    const aoa = [[`${S.config.congregation} — ${r.title}`], [r.period], [], sh.head, ...sh.rows];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = sh.head.map((h, i) => ({ wch: Math.min(48, Math.max(h.length, ...sh.rows.map(x => String(x[i] ?? '').length)) + 2) }));
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 3, c: 0 }, e: { r: 3 + sh.rows.length, c: sh.head.length - 1 } }) };
+    XLSX.utils.book_append_sheet(wb, ws, sh.name.slice(0, 31));
+  }
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  return saveFile(safeName(r.file) + '.xlsx', new Uint8Array(buf));
+}
+/* jsPDF n'utilise que les caractères Windows-1252 avec ses polices de base */
+const pdfTxt = s => String(s ?? '').replace(/[’‘]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, '-').replace(/…/g, '...').replace(/œ/g, 'oe').replace(/Œ/g, 'OE').replace(/[^\x00-\xFF]/g, '');
+async function toPdf(r){
+  await loadLib('jspdf'); await loadLib('autotable');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: r.landscape ? 'landscape' : 'portrait', unit: 'pt', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 36;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(17); doc.setTextColor(28, 36, 34);
+  doc.text(pdfTxt(r.title), M, 46);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(91, 103, 98);
+  doc.text(pdfTxt(`${S.config.congregation} · ${r.period}`), M, 62);
+  let y = 80;
+  for (const b of r.blocks) {
+    if (b.heading) {
+      if (y > H - 160) { doc.addPage(); y = 46; }
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(31, 94, 88); doc.text(pdfTxt(b.heading), M, y);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(91, 103, 98); doc.text(pdfTxt(b.sub || ''), M, y + 14);
+      y += 22;
+    }
+    const body = b.rows.map(row => Array.isArray(row) ? row.map(pdfTxt) : [{ content: pdfTxt(row.text), colSpan: b.head.length,
+      styles: { fillColor: SEC_RGB[row.sec], textColor: row.sec === 'neutral' ? [28, 36, 34] : 255, fontStyle: 'bold', fontSize: 8.5 } }]);
+    doc.autoTable({ startY: y, head: [b.head.map(pdfTxt)], body, theme: 'grid', margin: { left: M, right: M },
+      styles: { font: 'helvetica', fontSize: 9, cellPadding: 4, lineColor: [220, 226, 221], lineWidth: .5, textColor: [28, 36, 34], overflow: 'linebreak' },
+      headStyles: { fillColor: [31, 94, 88], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [247, 249, 247] } });
+    y = doc.lastAutoTable.finalY + 26;
+  }
+  const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFontSize(8.5); doc.setTextColor(140, 150, 146);
+    doc.text(pdfTxt(`Édité le ${fmtD(today)} ${today.getFullYear()}`), M, H - 18); doc.text(`${i} / ${n}`, W - M, H - 18, { align: 'right' }); }
+  return saveFile(safeName(r.file) + '.pdf', doc.output('arraybuffer'));
+}
+/* ----- Fiches d'attribution des élèves (S-89) : 4 fiches par page A4, à découper ----- */
+function s89Slips(nWeeks){
+  const slips = [];
+  for (let i = 0; i < nWeeks; i++) {
+    const k = iso(addDays(parseD(UI.week), 7 * i)), w = S.midweek[k];
+    if (!w || w.event === 'assemblee') continue;
+    const md = meetingDate(k); let n = 0;
+    for (const sec of ['joyaux', 'ministere', 'vie']) for (const p of (w.parts || []).filter(x => x.sec === sec)) {
+      n++; if (p.kind !== 'student') continue;
+      const add = (a, b, room) => { if (a) slips.push({ name: pname(a) || '—', partner: p.solo ? '' : (pname(b) || 'à préciser'), date: fmtLong(md), no: n, title: p.title, min: p.min, room }); };
+      add(p.a, p.b, 'main'); if (S.config.aux) add(p.auxA, p.auxB, 'aux');
+    }
+  }
+  return slips;
+}
+async function toS89(slips, nWeeks){
+  await loadLib('jspdf');
+  const { jsPDF } = window.jspdf, doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), cw = W / 2, ch = H / 2;
+  const cut = () => { doc.setLineDashPattern([5, 5], 0); doc.setDrawColor(170, 178, 175); doc.setLineWidth(.6); doc.line(cw, 14, cw, H - 14); doc.line(14, ch, W - 14, ch); doc.setLineDashPattern([], 0); };
+  slips.forEach((s, i) => {
+    if (i && i % 4 === 0) doc.addPage();
+    if (i % 4 === 0) cut();
+    const c = i % 4, x = (c % 2) * cw + 26, y = Math.floor(c / 2) * ch + 30, w = cw - 52;
+    doc.setFillColor(31, 94, 88); doc.rect(x, y, w, 5, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(28, 36, 34); doc.text('ATTRIBUTION', x, y + 26);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(91, 103, 98);
+    doc.text(pdfTxt('Réunion Vie et ministère chrétiens'), x, y + 39); doc.text(pdfTxt(S.config.congregation), x + w, y + 26, { align: 'right' });
+    let yy = y + 66;
+    const field = (label, value, big) => {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(91, 103, 98); doc.text(pdfTxt(label.toUpperCase()), x, yy);
+      doc.setFont('helvetica', big ? 'bold' : 'normal'); doc.setFontSize(big ? 13 : 11); doc.setTextColor(28, 36, 34);
+      const lines = doc.splitTextToSize(pdfTxt(value), w).slice(0, 2); doc.text(lines, x, yy + 15);
+      yy += 15 + (lines.length - 1) * 13 + 6; doc.setDrawColor(220, 226, 221); doc.setLineWidth(.6); doc.line(x, yy, x + w, yy); yy += 18;
+    };
+    field('Nom', s.name, true);
+    if (s.partner) field('Interlocuteur', s.partner);
+    field('Date', s.date);
+    field('Exposé', `n° ${s.no} · ${s.title} (${s.min} min)`);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(91, 103, 98); doc.text('LIEU', x, yy);
+    [['main', 'Salle principale'], ['aux', 'Classe auxiliaire']].forEach(([k, l], j) => {
+      const bx = x + j * (w / 2), by = yy + 9;
+      doc.setDrawColor(28, 36, 34); doc.setLineWidth(.9); doc.rect(bx, by, 10, 10);
+      if (s.room === k) { doc.setLineWidth(1.6); doc.line(bx + 2, by + 5.5, bx + 4.2, by + 8); doc.line(bx + 4.2, by + 8, bx + 8.5, by + 2); }
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(28, 36, 34); doc.text(l, bx + 16, by + 8.5);
+    });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(110, 120, 116);
+    doc.text(doc.splitTextToSize(pdfTxt('Prépare ton exposé avec le cahier de la réunion. Si tu ne peux pas assurer cette attribution, préviens au plus tôt le frère responsable.'), w), x, y + ch - 78);
+  });
+  const first = UI.week, last = iso(addDays(parseD(UI.week), 7 * (nWeeks - 1)));
+  return saveFile(safeName(`Fiches S-89 ${nWeeks > 1 ? weekLabel(first).split(' ').slice(0, 2).join(' ') + ' au ' + weekLabel(last) : weekLabel(first)}`) + '.pdf', doc.output('arraybuffer'));
+}
+
+/* ----- Messages WhatsApp par personne ----- */
+const waNum = ph => { let d = String(ph || '').replace(/\D/g, ''); if (!d) return ''; if (d.startsWith('00')) d = d.slice(2); else if (d.length === 10) d = '225' + d; return d; };
+function buildMessages(map, when){
+  return Object.entries(map).map(([pid, lines]) => {
+    const p = S.people[pid] || {}, name = p.name || '—';
+    const text = `Bonjour ${name},\n\nVoici ton attribution pour la réunion du ${when} :\n${lines.map(l => '• ' + l).join('\n')}\n\nMerci, et bonne préparation !\n${S.config.congregation}`;
+    return { pid, name, phone: p.phone || '', text };
+  }).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+}
+function weekMessages(key){
+  const w = S.midweek[key], map = {}, P = id => pname(id) || 'à préciser';
+  const push = (pid, l) => { if (pid) (map[pid] || (map[pid] = [])).push(l); };
+  push(w.chairman, 'Président de la réunion'); push(w.prayerOpen, `Prière d’ouverture (après le cantique ${w.songOpen || ''})`.replace(' )', ')'));
+  push(w.prayerClose, 'Prière de fin'); if (S.config.aux) push(w.auxCounselor, 'Conseiller de la classe auxiliaire');
+  let n = 0;
+  for (const sec of ['joyaux', 'ministere', 'vie']) for (const p of (w.parts || []).filter(x => x.sec === sec)) {
+    n++; const t = `n° ${n} · ${p.title} (${p.min} min)`;
+    if (p.kind === 'study') { push(p.a, `${t} : conducteur`); push(p.b, `${t} : lecteur`); }
+    else if (p.kind === 'student') {
+      const room = (a, b, sfx) => { push(a, `${t}${p.solo ? '' : ', avec ' + P(b)}${sfx}`); if (!p.solo) push(b, `${t} : interlocuteur de ${P(a)}${sfx}`); };
+      room(p.a, p.b, ''); if (S.config.aux) room(p.auxA, p.auxB, ' — classe auxiliaire');
+    } else push(p.a, t);
+  }
+  const md = meetingDate(key);
+  return buildMessages(map, `${JOURS[md.getDay()]} ${fmtD(md)} ${md.getFullYear()} à ${S.config.midweekTime}`);
+}
+function weekendMessages(d){
+  const w = S.weekend[d], map = {}, push = (pid, l) => { if (pid) (map[pid] || (map[pid] = [])).push(l); };
+  push(w.chairman, 'Président de la réunion'); push(w.conductor, 'Conducteur de l’étude de La Tour de Garde');
+  push(w.reader, 'Lecteur de La Tour de Garde'); push(w.prayer, 'Prière de fin');
+  const dt = parseD(d);
+  return buildMessages(map, `${JOURS[dt.getDay()]} ${fmtD(dt)} ${dt.getFullYear()} à ${S.config.weekendTime}`);
+}
+async function copyFrom(btn, text, ta){
+  try { await navigator.clipboard.writeText(text); const o = btn.innerHTML; btn.textContent = 'Copié ✓'; setTimeout(() => btn.innerHTML = o, 1600); }
+  catch { if (ta) { ta.focus(); ta.select(); } toast('Texte sélectionné : utilisez Copier sur votre appareil.'); }
+}
+function messagesDialog(title, list){
+  const d = $('#dlg');
+  d.innerHTML = `<form method="dialog"><div class="dlg-h"><h2>${esc(title)}</h2><button class="icon-btn" value="x" aria-label="Fermer">${I.x}</button></div>
+    <div class="dlg-b" style="grid-template-columns:1fr;gap:0">
+      ${list.length ? `<p class="muted" style="margin:0 0 6px;font-size:13px">Un message prêt à envoyer pour chaque personne. Le bouton WhatsApp apparaît quand son numéro est enregistré dans Proclamateurs.</p>` : '<p class="muted" style="margin:0">Aucune attribution pour cette réunion.</p>'}
+      ${list.map((m, i) => `<div class="msg"><div class="row"><b>${esc(m.name)}</b><span class="muted" style="font-size:12.5px">${esc(m.phone)}</span><span class="spacer"></span>
+        <button type="button" class="btn sm" data-copy="${i}">${I.copy}Copier</button>
+        ${waNum(m.phone) ? `<a class="btn sm wa" href="https://wa.me/${waNum(m.phone)}?text=${encodeURIComponent(m.text)}" target="_blank" rel="noopener">${I.chat}WhatsApp</a>` : ''}</div>
+        <textarea readonly rows="${Math.min(9, m.text.split('\n').length)}" id="msg-${i}">${esc(m.text)}</textarea></div>`).join('')}
+    </div>
+    <div class="dlg-f">${list.length > 1 ? `<button type="button" class="btn" id="msg-all">${I.copy}Copier tous les messages</button>` : ''}<span class="spacer"></span><button class="btn primary" value="x">Fermer</button></div></form>`;
+  d.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => copyFrom(b, list[+b.dataset.copy].text, $('#msg-' + b.dataset.copy)));
+  const all = $('#msg-all'); if (all) all.onclick = () => copyFrom(all, list.map(m => m.text).join('\n\n— — —\n\n'), null);
+  d.onclose = () => render(); d.showModal();
+}
+
+/* ----- Sauvegarde / restauration ----- */
+async function backupData(){
+  const data = { app: 'programme-reunions', version: 1, exportedAt: new Date().toISOString(), config: S.config, people: S.people, speakers: S.speakers, midweek: S.midweek, weekend: S.weekend };
+  return saveFile(`Sauvegarde reunions ${iso(new Date())}.json`, JSON.stringify(data, null, 1));
+}
+async function restoreAll(data){
+  const ops = [['config/main', { ...DEFAULT_CONFIG, ...(data.config || {}) }]];
+  S.config = ops[0][1];
+  for (const col of COLS) {
+    const src = data[col] || {};
+    for (const id of Object.keys(S[col])) if (!(id in src)) ops.push([`${col}/${id}`, null]);
+    for (const [id, doc] of Object.entries(src)) ops.push([`${col}/${id}`, doc]);
+    S[col] = clone(src);
+  }
+  if (!db) { saveLocal(); return true; }
+  let done = 0;
+  for (const [p, doc] of ops) {
+    try { if (doc) await db.doc(p).set(clone(doc)); else await db.doc(p).delete(); }
+    catch (e) { writeError(e); return false; }
+    if (++done % 10 === 0) toast(`Restauration… ${done} / ${ops.length}`);
+  }
+  return true;
+}
+
+/* ----- Installation (application installée depuis un lien) ----- */
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; const b = $('#installBtn'); if (b) b.hidden = false; });
+window.addEventListener('appinstalled', () => { installEvt = null; const b = $('#installBtn'); if (b) b.hidden = true; toast('Application installée'); });
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+function exportDialog(what){
+  const d = $('#dlg');
+  const label = { week: 'le programme de semaine', weekend: 'le planning du week-end', people: 'la liste des proclamateurs', speakers: 'le carnet des orateurs' }[what];
+  const weekOpt = what === 'week' ? `<fieldset class="wide"><legend>Période, à partir de la semaine affichée</legend><div class="seg" id="ex-n">
+      ${[[1, 'Cette semaine'], [4, '4 semaines'], [8, '8 semaines'], [13, '3 mois']].map(([v, l], i) => `<button type="button" data-n="${v}" aria-pressed="${i === 0}">${l}</button>`).join('')}</div></fieldset>` : '';
+  const s89Btn = what === 'week' ? `<button type="button" class="btn wide" data-fmt="s89" style="justify-content:center;padding:14px">${I.dl}Fiches d’attribution des élèves (S-89, PDF)</button>` : '';
+  const weNote = what === 'weekend' ? `<p class="muted wide" style="margin:0">Période exportée : celle affichée à l’écran (${UI.weMonths} mois à partir de ${MOIS[+UI.weStart.split('-')[1] - 1]} ${UI.weStart.split('-')[0]}).</p>` : '';
+  d.innerHTML = `<form method="dialog"><div class="dlg-h"><h2>Exporter ${label}</h2><button class="icon-btn" value="x" aria-label="Fermer">${I.x}</button></div>
+    <div class="dlg-b">${weekOpt}${weNote}
+      <button type="button" class="btn" data-fmt="xlsx" style="justify-content:center;padding:14px">${I.dl}Excel (.xlsx)</button>
+      <button type="button" class="btn primary" data-fmt="pdf" style="justify-content:center;padding:14px">${I.dl}PDF à imprimer</button>${s89Btn}
+      <p class="muted wide" id="ex-status" style="margin:0" aria-live="polite"></p></div></form>`;
+  let n = 1;
+  const seg = $('#ex-n'); if (seg) seg.onclick = e => { const b = e.target.closest('button'); if (!b) return; n = +b.dataset.n; seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); };
+  d.querySelectorAll('[data-fmt]').forEach(btn => btn.onclick = async () => {
+    if (btn.dataset.fmt === 's89') {
+      const st = $('#ex-status'), slips = s89Slips(n);
+      if (!slips.length) { st.textContent = 'Aucun exposé d’élève attribué sur cette période.'; return; }
+      d.querySelectorAll('[data-fmt]').forEach(x => x.disabled = true); st.textContent = `Préparation de ${slips.length} fiche${slips.length > 1 ? 's' : ''}…`;
+      try { if (await toS89(slips, n)) d.close(); else st.textContent = ''; }
+      catch { st.textContent = 'Les fiches n’ont pas pu être préparées. Vérifiez la connexion internet puis réessayez.'; }
+      finally { d.querySelectorAll('[data-fmt]').forEach(x => x.disabled = false); }
+      return;
+    }
+    const r = what === 'week' ? reportWeek(n) : what === 'weekend' ? reportWeekend() : what === 'people' ? reportPeople() : reportSpeakers();
+    const st = $('#ex-status');
+    if (r.empty) { st.textContent = 'Rien à exporter sur cette période : aucun programme n’est encore saisi.'; return; }
+    d.querySelectorAll('[data-fmt]').forEach(x => x.disabled = true); st.textContent = 'Préparation du fichier…';
+    try { const ok = btn.dataset.fmt === 'xlsx' ? await toExcel(r) : await toPdf(r); if (ok) d.close(); else st.textContent = ''; }
+    catch { st.textContent = 'Le fichier n’a pas pu être préparé. Vérifiez la connexion internet puis réessayez.'; }
+    finally { d.querySelectorAll('[data-fmt]').forEach(x => x.disabled = false); }
+  });
+  d.onclose = () => render();
+  d.showModal();
+}
+
+/* ---------- Démarrage ---------- */
+UI.tab = ['semaine', 'weekend', 'proclamateurs', 'orateurs'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'semaine';
+render();
+boot();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
