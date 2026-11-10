@@ -6,13 +6,12 @@
 //   assemblees/{aid}/people|speakers|midweek|weekend|config/...   les données de l'assemblée
 //   acces/{email}/assemblees/{aid}         { role, nom }  pour que chaque frère retrouve SES assemblées
 //
-// L'administrateur général (FIREBASE_OWNER) crée les assemblées et nomme leurs responsables.
+// L'administrateur général (défini uniquement dans les règles, côté serveur) crée les assemblées et nomme leurs responsables.
 // La sécurité est assurée par les règles Firestore (firestore.rules), pas seulement par l'affichage.
 
 const VERSION = '10.12.2';
 const resolveReady = window.__resolveFirebase || (() => {});
 const cfg = window.FIREBASE_CONFIG;
-const ADMIN = String(window.FIREBASE_OWNER || '').toLowerCase();
 const ROLES = { admin: 'Responsable de l’assemblée', editeur: 'Peut modifier le programme', lecteur: 'Consultation seule' };
 const DONNEES = ['people', 'speakers', 'midweek', 'weekend', 'config'];
 const CLE_AID = 'vcm-assemblee';
@@ -34,8 +33,8 @@ async function start(){
   let pret = false;
   F.onAuthStateChanged(auth, async u => {
     if (!u) { if (pret) location.reload(); else showGate('login'); return; }
-    const email = (u.email || '').toLowerCase(), general = email === ADMIN;
-    const liste = await mesAssemblees(email, general);
+    const email = (u.email || '').toLowerCase();
+    const { liste, general } = await mesAssemblees(email);
     me = { email, general, liste };
     if (!liste.length) { showGate(general ? 'premiere' : 'denied', email); return; }
     let cur = liste.find(x => x.id === lsGet(CLE_AID));
@@ -52,20 +51,37 @@ const lsGet = k => { try { return localStorage.getItem(k); } catch { return null
 const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} };
 const parNom = (a, b) => String(a.nom).localeCompare(String(b.nom), 'fr');
 
-/* Les assemblées auxquelles ce compte a accès */
-async function mesAssemblees(email, general){
-  const cle = 'vcm-assemblees-' + email;
+/* Les assemblées auxquelles ce compte a accès.
+   L'administrateur général n'est pas écrit dans le code public : c'est le seul compte
+   que les règles de sécurité autorisent à lister toutes les assemblées. */
+async function mesAssemblees(email){
+  const cle = 'vcm-assemblees-' + email, cleG = 'vcm-general-' + email;
   try {
     const m = new Map();
-    const s = await F.getDocs(F.collection(fs, 'acces', email, 'assemblees'));
+    const s = await F.getDocsFromServer(F.collection(fs, 'acces', email, 'assemblees'));
     s.docs.forEach(d => { const x = d.data(); if (ROLES[x.role]) m.set(d.id, { id: d.id, role: x.role, nom: x.nom || d.id }); });
-    if (general) (await F.getDocs(F.collection(fs, 'assemblees'))).docs.forEach(d => m.set(d.id, { id: d.id, role: 'admin', nom: d.data().nom || d.id }));
+    let general = false;
+    try {
+      const toutes = await F.getDocsFromServer(F.collection(fs, 'assemblees'));
+      general = true;
+      toutes.docs.forEach(d => m.set(d.id, { id: d.id, role: 'admin', nom: d.data().nom || d.id }));
+    } catch (e) { if (!e || e.code !== 'permission-denied') throw e; }
     const liste = [...m.values()].sort(parNom);
-    lsSet(cle, JSON.stringify(liste));
-    return liste;
+    lsSet(cle, JSON.stringify(liste)); lsSet(cleG, general ? '1' : null);
+    return { liste, general };
   } catch (e) {
-    try { return JSON.parse(lsGet(cle)) || []; } catch { return []; } // hors ligne : dernière liste connue
+    // Hors ligne : dernière situation connue sur cet appareil (l'affichage seulement ; la base reste protégée par les règles)
+    let liste = []; try { liste = JSON.parse(lsGet(cle)) || []; } catch {}
+    return { liste, general: lsGet(cleG) === '1' };
   }
+}
+
+/* Déconnexion : on efface aussi la copie locale des données sur cet appareil */
+async function deconnexion(){
+  try { for (const k of Object.keys(localStorage)) if (k.startsWith('vcm-')) localStorage.removeItem(k); } catch {}
+  try { await F.signOut(auth); } catch {}
+  try { await F.terminate(fs); await F.clearIndexedDbPersistence(fs); } catch {}
+  location.reload();
 }
 
 /* Interface attendue par l'application, limitée à l'assemblée choisie */
@@ -174,7 +190,7 @@ function showGate(kind, info){
   const b = id => document.getElementById(id);
   if (b('g-login')) b('g-login').onclick = connexion;
   if (b('g-retry')) b('g-retry').onclick = () => location.reload();
-  if (b('g-out')) b('g-out').onclick = () => { lsSet(CLE_AID, null); F.signOut(auth).then(() => location.reload()); };
+  if (b('g-out')) b('g-out').onclick = deconnexion;
   g.querySelectorAll('[data-aid]').forEach(x => x.onclick = () => { lsSet(CLE_AID, x.dataset.aid); location.reload(); });
   if (b('g-creer')) b('g-creer').onclick = async () => {
     const nom = b('g-nom').value.trim(); if (nom.length < 3) { b('g-err').textContent = 'Indiquez le nom de l’assemblée.'; return; }
@@ -221,7 +237,7 @@ async function renderSettings(el){
       <div class="acc-add"><input type="email" id="acc-mail" placeholder="adresse@gmail.com" autocomplete="off"><select id="acc-role">${optionsRoles('editeur')}</select>
         <button type="button" class="btn sm primary" id="acc-add">Ajouter</button></div><p class="muted" id="acc-msg" style="margin:6px 0 0;font-size:13px"></p></fieldset>` : ''}
     ${me.general ? `<fieldset style="margin-top:14px"><legend>Administration · toutes les assemblées</legend><div id="adm"><p class="muted">Chargement…</p></div></fieldset>` : ''}`;
-  el.querySelector('#acc-out').onclick = () => { lsSet(CLE_AID, null); F.signOut(auth); };
+  el.querySelector('#acc-out').onclick = deconnexion;
   const sw = el.querySelector('#acc-switch'); if (sw) sw.onchange = () => { lsSet(CLE_AID, sw.value); location.reload(); };
   if (resp) membresAssemblee(el);
   if (me.general) administration(el.querySelector('#adm'));

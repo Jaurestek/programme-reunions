@@ -402,7 +402,19 @@ let db = null, saving = 0, DL = null;
 const exportBtn = what => DL ? `<button class="btn" data-act="export" data-what="${what}">${I.dl}Exporter</button>` : '';
 const queue = {};
 
-function loadLocal(){ const d = lsGet('vcm-data-v1'); if (d) { COLS.forEach(c => S[c] = d[c] || {}); S.config = { ...DEFAULT_CONFIG, ...(d.config || {}) }; } }
+/* Sécurité : les valeurs techniques venant de la base (identifiants, sections, types) sont
+   ramenées à des formes sûres avant tout affichage, pour empêcher l'injection de code. */
+const SECS_OK = ['joyaux', 'ministere', 'vie'], KINDS_OK = ['talk', 'student', 'study'];
+function clean(col, x){
+  if (col !== 'midweek' || !x || typeof x !== 'object') return x;
+  const y = clone(x);
+  y.parts = (Array.isArray(y.parts) ? y.parts : []).filter(p => p && typeof p === 'object').map((p, i) => ({ ...p,
+    id: String(p.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40) || 'x' + i,
+    sec: SECS_OK.includes(p.sec) ? p.sec : 'vie', kind: KINDS_OK.includes(p.kind) ? p.kind : 'talk' }));
+  return y;
+}
+const cleanAll = (col, map) => { const o = {}; for (const [k, v] of Object.entries(map || {})) o[k] = clean(col, v); return o; };
+function loadLocal(){ const d = lsGet('vcm-data-v1'); if (d) { COLS.forEach(c => S[c] = cleanAll(c, d[c])); S.config = { ...DEFAULT_CONFIG, ...(d.config || {}) }; } }
 function saveLocal(){ lsSet('vcm-data-v1', { people: S.people, speakers: S.speakers, midweek: S.midweek, weekend: S.weekend, config: S.config }); }
 const pathOf = (col, id) => col === 'config' ? 'config/main' : `${col}/${id}`;
 const isPending = p => queue[p] && (queue[p].data || queue[p].busy);
@@ -470,7 +482,7 @@ async function boot(){
   COLS.forEach(col => {
     db.collection(col).onSnapshot(snap => {
       const m = {};
-      snap.docs.forEach(d => { const p = `${col}/${d.id}`; m[d.id] = isPending(p) ? S[col][d.id] : d.data(); });
+      snap.docs.forEach(d => { const p = `${col}/${d.id}`; m[d.id] = isPending(p) ? S[col][d.id] : clean(col, d.data()); });
       Object.keys(S[col]).forEach(id => { if (!m[id] && isPending(`${col}/${id}`) && queue[`${col}/${id}`].data) m[id] = S[col][id]; });
       S[col] = m; if (!snap.metadata.fromCache) S.loaded.add(col); done(); scheduleRender();
     }, () => { S.loaded.add(col); scheduleRender(); });
@@ -538,7 +550,7 @@ function personSelect(field, value, qual, { sex = null, ref = iso(today), part =
   const q = all.filter(ok).sort((a, b) => { const la = lastBefore(a.id, ref) || '', lb = lastBefore(b.id, ref) || ''; return la === lb ? byName(a, b) : la < lb ? -1 : 1; });
   const rest = all.filter(p => !ok(p)).sort(byName);
   const opt = p => `<option value="${esc(p.id)}"${p.id === value ? ' selected' : ''}>${esc(p.name)} · ${agoLabel(p.id, ref)}</option>`;
-  let h = `<select data-f="${field}"${part ? ` data-part="${part}"` : ''} class="${value ? '' : 'unset'} ${cls}" data-pid="${esc(value || '')}"><option value="">— à attribuer —</option>`;
+  let h = `<select data-f="${field}"${part ? ` data-part="${esc(part)}"` : ''} class="${value ? '' : 'unset'} ${cls}" data-pid="${esc(value || '')}"><option value="">— à attribuer —</option>`;
   if (value && !S.people[value]) h += `<option value="${esc(value)}" selected>(personne supprimée)</option>`;
   if (q.length) h += `<optgroup label="Qualifiés (le moins récent en premier)">${q.map(opt).join('')}</optgroup>`;
   if (rest.length) h += `<optgroup label="Autres">${rest.map(opt).join('')}</optgroup>`;
@@ -1416,8 +1428,8 @@ async function restoreAll(data){
   for (const col of COLS) {
     const src = data[col] || {};
     for (const id of Object.keys(S[col])) if (!(id in src)) ops.push([`${col}/${id}`, null]);
-    for (const [id, doc] of Object.entries(src)) ops.push([`${col}/${id}`, doc]);
-    S[col] = clone(src);
+    for (const [id, doc] of Object.entries(src)) ops.push([`${col}/${id}`, clean(col, doc)]);
+    S[col] = cleanAll(col, src);
   }
   if (!db) { saveLocal(); return true; }
   let done = 0;
