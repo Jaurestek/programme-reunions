@@ -1,4 +1,4 @@
-const CACHE = 'reunions-202611100006';
+const CACHE = 'reunions-202611100032';
 const BASE = ['./', 'index.html', 'manifest.webmanifest', 'firebase-config.js', 'firebase-sync.js', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/favicon-48.png'];
 const EXTERNES = [
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',

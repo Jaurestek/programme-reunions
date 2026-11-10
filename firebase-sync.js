@@ -36,6 +36,7 @@ async function start(){
     if (!u) { if (pret) location.reload(); else showGate('login'); return; }
     const email = (u.email || '').toLowerCase(), general = email === ADMIN;
     const liste = await mesAssemblees(email, general);
+    me = { email, general, liste };
     if (!liste.length) { showGate(general ? 'premiere' : 'denied', email); return; }
     let cur = liste.find(x => x.id === lsGet(CLE_AID));
     if (!cur) { if (liste.length === 1) cur = liste[0]; else { me = { email, general, liste }; showGate('choix', liste); return; } }
@@ -179,7 +180,7 @@ function showGate(kind, info){
     const nom = b('g-nom').value.trim(); if (nom.length < 3) { b('g-err').textContent = 'Indiquez le nom de l’assemblée.'; return; }
     b('g-creer').disabled = true;
     try { const id = await creerAssemblee(nom); lsSet(CLE_AID, id); location.reload(); }
-    catch (e) { b('g-creer').disabled = false; b('g-err').textContent = e && e.code === 'permission-denied' ? 'Refusé : les règles de sécurité ne sont pas à jour dans Firebase.' : 'Création impossible. Vérifiez la connexion internet.'; }
+    catch (e) { console.error(e); b('g-creer').disabled = false; b('g-err').textContent = e && e.code === 'permission-denied' ? 'Refusé par les règles de sécurité (permission-denied).' : `Création impossible (${(e && (e.code || e.message)) || 'erreur inconnue'}).`; }
   };
 }
 function hideGate(){ const g = document.getElementById('gate'); if (g) g.remove(); }
@@ -246,7 +247,7 @@ async function membresAssemblee(el){
     const m = el.querySelector('#acc-mail').value.trim().toLowerCase(), r = el.querySelector('#acc-role').value;
     if (!mailOk(m)) { msg.textContent = 'Adresse e-mail invalide.'; return; }
     try { await donnerAcces(me.aid, me.nom, m, r); msg.textContent = `${m} a maintenant accès à ${me.nom}. Envoyez-lui le lien de l’application.`; el.querySelector('#acc-mail').value = ''; charger(); }
-    catch { msg.textContent = 'Ajout impossible. Vérifiez la connexion internet.'; }
+    catch (e) { msg.textContent = `Ajout impossible (${(e && (e.code || e.message)) || 'erreur inconnue'}).`; }
   };
   charger();
 }
@@ -273,13 +274,13 @@ async function administration(box){
       const m = c.querySelector('[data-mail]').value.trim().toLowerCase();
       if (!mailOk(m)) { msg.textContent = 'Adresse e-mail invalide.'; return; }
       try { await donnerAcces(a.id, a.nom, m, 'admin'); msg.textContent = `${m} est maintenant responsable de ${a.nom}.`; administration(box); }
-      catch { msg.textContent = 'Nomination impossible. Vérifiez la connexion internet.'; }
+      catch (e) { msg.textContent = `Nomination impossible (${(e && (e.code || e.message)) || 'erreur inconnue'}).`; }
     };
   });
   box.querySelector('#adm-creer').onclick = async () => {
     const nom = box.querySelector('#adm-nom').value.trim(); if (nom.length < 3) { msg.textContent = 'Indiquez le nom de l’assemblée.'; return; }
     try { await creerAssemblee(nom); msg.textContent = `Assemblée « ${nom} » créée. Nommez maintenant son responsable.`; administration(box); }
-    catch { msg.textContent = 'Création impossible. Vérifiez la connexion internet.'; }
+    catch (e) { msg.textContent = `Création impossible (${(e && (e.code || e.message)) || 'erreur inconnue'}).`; }
   };
   ancienneVersion(box.querySelector('#adm-ancien'), ass);
 }
