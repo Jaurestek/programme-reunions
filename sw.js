@@ -1,4 +1,4 @@
-const CACHE = 'reunions-202611100032';
+const CACHE = 'reunions-202611100036';
 const BASE = ['./', 'index.html', 'manifest.webmanifest', 'firebase-config.js', 'firebase-sync.js', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/favicon-48.png'];
 const EXTERNES = [
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
@@ -17,7 +17,7 @@ self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
   if (u.origin === location.origin) {
     // La page : réseau d'abord (pour recevoir les mises à jour), sinon la copie gardée
-    e.respondWith(fetch(e.request).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(e.request, c)); return r; })
+    e.respondWith(fetch(e.request, { cache: 'no-cache' }).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(e.request, c)); return r; })
       .catch(() => caches.match(e.request, { ignoreSearch: true }).then(r => r || caches.match('index.html'))));
   } else if (/cdnjs\.cloudflare\.com|fonts\.(googleapis|gstatic)\.com/.test(u.host) || (u.host === 'www.gstatic.com' && u.pathname.startsWith('/firebasejs/'))) {
     // Bibliothèques et polices : copie gardée d'abord
