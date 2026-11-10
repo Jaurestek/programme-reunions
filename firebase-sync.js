@@ -41,6 +41,7 @@ async function start(){
     if (!cur) { if (liste.length === 1) cur = liste[0]; else { me = { email, general, liste }; showGate('choix', liste); return; } }
     lsSet(CLE_AID, cur.id);
     me = { email, general, liste, aid: cur.id, nom: cur.nom, role: general ? 'admin' : cur.role };
+    window.CURRENT_EMAIL = email; // pour « Mes attributions »
     hideGate();
     window.onSettingsOpen = renderSettings;
     if (!pret) { pret = true; resolveReady(adapter(`assemblees/${cur.id}/`, me.role)); }

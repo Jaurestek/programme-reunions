@@ -320,6 +320,13 @@ select.unset{border-style:dashed;background:var(--soft)}
 .section>h2{padding:10px 14px}
 .avatar{background:color-mix(in srgb,var(--accent) 13%,var(--card))}
 .avatar.f{background:color-mix(in srgb,var(--vie) 12%,var(--card))}
+.chip.grp{color:var(--ministere);background:color-mix(in srgb,var(--ministere) 12%,transparent)}
+.mine{margin-bottom:14px;padding:14px 16px;border-left:4px solid var(--ministere)}
+.mine h2{font-family:var(--f-body);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.mine ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.mine li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.mine .when{font-weight:700;font-size:13px;min-width:92px;color:var(--accent)}
+.mine .what{font-size:14px}
 .chip.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
 .chip.warn{background:color-mix(in srgb,var(--warn) 13%,transparent)}
 .datebox{background:var(--card);overflow:hidden;padding:0}
@@ -390,9 +397,23 @@ const QUALS = [
   ['president','Président (semaine)'], ['priere','Prière'], ['joyaux','Discours – Joyaux'], ['perles','Perles spirituelles'],
   ['lecture','Lecture de la Bible'], ['ministere','Exposés – Ministère'], ['vie','Parties – Vie chrétienne'],
   ['etude','Conducteur – Étude biblique'], ['lecteur','Lecteur'], ['presidentWE','Président (week-end)'],
-  ['conducteurTG','Conducteur – Tour de Garde'], ['orateur','Orateur (discours public)']
+  ['conducteurTG','Conducteur – Tour de Garde'], ['orateur','Orateur (discours public)'],
+  ['sono','Sonorisation et vidéo'], ['micro','Micros'], ['accueil','Accueil'], ['estrade','Estrade']
 ];
 const SECTIONS = { joyaux: 'Joyaux de la Parole de Dieu', ministere: 'Applique-toi au ministère', vie: 'Vie chrétienne' };
+/* Tâches de la réunion (semaine et week-end) : [clé, libellé, qualification] */
+const DUTIES = [['sono', 'Sonorisation', 'sono'], ['video', 'Vidéo / Zoom', 'sono'], ['micro1', 'Micro 1', 'micro'], ['micro2', 'Micro 2', 'micro'], ['accueil', 'Accueil', 'accueil'], ['estrade', 'Estrade', 'estrade']];
+/* Désignations : ancien, assistant, proclamateur(trice) baptisé(e) ou non, élève pas encore proclamateur */
+const STATUTS = ['ancien', 'assistant', 'baptise', 'nonbaptise', 'eleve'];
+function statutOf(p){ if (STATUTS.includes(p.statut)) return p.statut; return p.privilege === 'ancien' ? 'ancien' : p.privilege === 'assistant' ? 'assistant' : p.baptized === false ? 'nonbaptise' : 'baptise'; }
+function statutLabel(s, sex){
+  const f = sex === 'F';
+  return { ancien: 'Ancien', assistant: 'Assistant ministériel', baptise: f ? 'Proclamatrice baptisée' : 'Proclamateur baptisé',
+    nonbaptise: f ? 'Proclamatrice non baptisée' : 'Proclamateur non baptisé', eleve: 'Élève (pas encore proclamateur)' }[s];
+}
+function pioneerLabel(v, sex){ const f = sex === 'F'; return { auxiliaire: f ? 'Pionnière auxiliaire' : 'Pionnier auxiliaire', permanent: f ? 'Pionnière permanente' : 'Pionnier permanent', special: f ? 'Pionnière spéciale' : 'Pionnier spécial' }[v] || ''; }
+const groupsList = () => (Array.isArray(S.config.groups) ? S.config.groups : []).filter(g => g && g.id);
+const groupName = id => { const g = groupsList().find(x => x.id === id); return g ? g.name : ''; };
 const DEFAULT_CONFIG = { congregation: 'Mon assemblée', midweekDay: 4, midweekTime: '18:30', weekendDay: 0, weekendTime: '09:00', aux: false };
 
 /* ---------- Données ---------- */
@@ -501,7 +522,7 @@ function nextMeetingWeek(){
   return iso(new Date(today.getFullYear(), today.getMonth(), today.getDate()) > md ? addDays(m, 7) : m);
 }
 const UI = {
-  tab: 'semaine', week: nextMeetingWeek(), anim: null, peopleFilter: 'tous', search: '',
+  tab: 'semaine', week: nextMeetingWeek(), anim: null, peopleGroup: '', peopleFilter: 'tous', search: '',
   weStart: lsGet('vcm-we-start') || `${today.getFullYear()}-${pad(today.getMonth() + 1)}`, weMonths: lsGet('vcm-we-months') || 4,
   openWE: new Set(), confirm: null
 };
@@ -531,8 +552,9 @@ function buildIndex(){
     const d = iso(addDays(parseD(k), (S.config.midweekDay + 6) % 7));
     ['chairman','auxCounselor','prayerOpen','prayerClose'].forEach(f => add(w[f], d));
     (w.parts || []).forEach(p => ['a','b','auxA','auxB'].forEach(f => add(p[f], d)));
+    Object.values(w.duties || {}).forEach(pid => add(pid, d));
   }
-  for (const [k, w] of Object.entries(S.weekend)) ['chairman','conductor','reader','prayer','speakerId'].forEach(f => add(w[f], k));
+  for (const [k, w] of Object.entries(S.weekend)) { ['chairman','conductor','reader','prayer','speakerId'].forEach(f => add(w[f], k)); Object.values(w.duties || {}).forEach(pid => add(pid, k)); }
   Object.values(IDX).forEach(a => a.sort());
 }
 function lastBefore(pid, refISO){ const a = IDX[pid] || []; let r = null; for (const d of a) { if (d < refISO) r = d; else break; } return r; }
@@ -549,7 +571,7 @@ function personSelect(field, value, qual, { sex = null, ref = iso(today), part =
   const ok = p => (p.quals || []).includes(qual) && (!sex || p.sex === sex);
   const q = all.filter(ok).sort((a, b) => { const la = lastBefore(a.id, ref) || '', lb = lastBefore(b.id, ref) || ''; return la === lb ? byName(a, b) : la < lb ? -1 : 1; });
   const rest = all.filter(p => !ok(p)).sort(byName);
-  const opt = p => `<option value="${esc(p.id)}"${p.id === value ? ' selected' : ''}>${esc(p.name)} · ${agoLabel(p.id, ref)}</option>`;
+  const opt = p => { const g = groupName(p.group); return `<option value="${esc(p.id)}"${p.id === value ? ' selected' : ''}>${esc(p.name)}${g ? ' (' + esc(g) + ')' : ''} · ${agoLabel(p.id, ref)}</option>`; };
   let h = `<select data-f="${field}"${part ? ` data-part="${esc(part)}"` : ''} class="${value ? '' : 'unset'} ${cls}" data-pid="${esc(value || '')}"><option value="">— à attribuer —</option>`;
   if (value && !S.people[value]) h += `<option value="${esc(value)}" selected>(personne supprimée)</option>`;
   if (q.length) h += `<optgroup label="Qualifiés (le moins récent en premier)">${q.map(opt).join('')}</optgroup>`;
@@ -557,6 +579,10 @@ function personSelect(field, value, qual, { sex = null, ref = iso(today), part =
   return h + '</select>';
 }
 const fld = (label, inner, cls = '') => `<label class="fld ${cls}"><span>${label}</span>${inner}</label>`;
+/* Bloc « Tâches de la réunion » ; extra = attributs ajoutés aux menus (ex. data-we pour le week-end) */
+function dutiesBlock(duties, ref, extra = ''){
+  return DUTIES.map(([k, l, q]) => fld(l, personSelect('duty', (duties || {})[k], q, { ref }).replace('<select', `<select data-duty="${k}" ${extra}`))).join('');
+}
 
 /* ---------- Icônes ---------- */
 const I = {
@@ -571,6 +597,7 @@ const I = {
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   timer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>',
   next2: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v14l10-7zM17 5h2v14h-2z"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></svg>',
   chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>',
   note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
   mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>',
@@ -619,7 +646,7 @@ function meetingDate(key){ return addDays(parseD(key), (S.config.midweekDay + 6)
 function viewWeek(){
   const key = UI.week, w = S.midweek[key], md = meetingDate(key), ref = iso(md);
   const st = w && w.event !== 'assemblee' ? weekStats(w) : null;
-  let h = `<section class="hero card">
+  let h = `${mineCard()}<section class="hero card">
     <div class="hero-top">
       <button class="icon-btn" data-act="wk-prev" aria-label="Semaine précédente">${I.prev}</button>
       <label class="cal" title="Choisir une autre date"><small>${JOURS[md.getDay()].slice(0, 3)}</small><b>${md.getDate()}</b><small>${['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'][md.getMonth()]}</small><input type="date" class="cal-pick" value="${iso(md)}" aria-label="Aller à une autre date"></label>
@@ -687,6 +714,7 @@ function viewWeek(){
       ${fld('Cantique final', `<input type="text" inputmode="numeric" class="num" data-f="songClose" value="${esc(w.songClose)}" placeholder="n°">`)}
       ${fld('Prière', personSelect('prayerClose', w.prayerClose, 'priere', { ref, cls: dupIds.includes(w.prayerClose) ? 'dup' : '' }))}
     </div></div></div>
+    <div class="section neutral"><h2>Tâches de la réunion</h2><div class="meta-grid">${dutiesBlock(w.duties, ref)}</div></div>
     <div class="row" style="margin-top:16px">
       <span class="muted" style="font-size:13px">La durée prévue compte les cantiques et la minute de conseils après chaque exposé.</span><span class="spacer"></span>
       <button class="btn ghost danger sm" data-act="wk-delete">Supprimer cette semaine</button>
@@ -764,7 +792,10 @@ function weekText(key){
       if (S.config.aux && p.kind === 'student' && (p.auxA || p.auxB)) t += `   Classe aux. : ${P(p.auxA)}${p.solo ? '' : ' / ' + P(p.auxB)}\n`;
     }
   }
-  return t + `\nCantique ${w.songClose || '…'} · Prière : ${P(w.prayerClose)}`;
+  t += `\nCantique ${w.songClose || '…'} · Prière : ${P(w.prayerClose)}`;
+  const dt = DUTIES.filter(([k]) => (w.duties || {})[k]);
+  if (dt.length) t += `\n\n*TÂCHES*\n` + dt.map(([k, l]) => `${l} : ${P(w.duties[k])}`).join('\n');
+  return t;
 }
 
 /* ----- Week-end ----- */
@@ -816,6 +847,8 @@ function viewWeekend(){
       ${fld('Prière finale', personSelect('prayer', w.prayer, 'priere', { ref: d }).replace('<select', `<select data-we="${d}"`))}
       ${fld('Cantiques', `<div class="row" style="flex-wrap:nowrap"><input type="text" inputmode="numeric" class="num" data-we="${d}" data-f="songOpen" value="${esc(w.songOpen)}" placeholder="1er" aria-label="Premier cantique"><input type="text" inputmode="numeric" class="num" data-we="${d}" data-f="songMid" value="${esc(w.songMid)}" placeholder="2e" aria-label="Deuxième cantique"><input type="text" inputmode="numeric" class="num" data-we="${d}" data-f="songClose" value="${esc(w.songClose)}" placeholder="3e" aria-label="Dernier cantique"></div>`)}
       ${fld('Notes (accueil, repas, transport…)', `<input type="text" data-we="${d}" data-f="note" value="${esc(w.note)}">`, 'wide')}
+      <div class="wide" style="font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:4px">Tâches de la réunion</div>
+      ${dutiesBlock(w.duties, d, `data-we="${d}"`)}
       <div class="acts"><button class="btn primary sm" data-act="timer-we" data-d="${d}">${I.timer}Chronomètre</button><button class="btn sm" data-act="msg-we" data-d="${d}">${I.chat}Messages</button><span class="spacer"></span>
         ${UI.confirm === 'we-' + d ? `<button class="btn sm danger" data-act="we-del-yes" data-d="${d}">Confirmer</button><button class="btn sm" data-act="cancel">Annuler</button>` : `<button class="btn sm ghost danger" data-act="we-del" data-d="${d}">Retirer cette date</button>`}</div>
     </div></details>`;
@@ -848,23 +881,29 @@ function weText(){
 /* ----- Proclamateurs ----- */
 const initials = n => (n || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
 function personChips(p){
-  const c = [];
-  if (p.privilege === 'ancien') c.push('<span class="chip acc">Ancien</span>');
-  if (p.privilege === 'assistant') c.push('<span class="chip acc">Assistant ministériel</span>');
-  if (p.student) c.push('<span class="chip">Élève</span>');
-  if (p.baptized === false) c.push('<span class="chip">Non baptisé</span>');
+  const c = [], s = statutOf(p);
+  c.push(`<span class="chip${s === 'ancien' || s === 'assistant' ? ' acc' : ''}">${statutLabel(s, p.sex)}</span>`);
+  if (p.pioneer) c.push(`<span class="chip ok">${pioneerLabel(p.pioneer, p.sex)}</span>`);
+  const g = groupName(p.group); if (g) c.push(`<span class="chip grp">${esc(g)}</span>`);
+  if (p.student && s !== 'eleve') c.push('<span class="chip">École</span>');
   if (p.example) c.push('<span class="chip ex">exemple</span>');
   return c.join('');
 }
 function viewPeople(){
   const all = Object.entries(S.people).map(([id, p]) => ({ id, ...p })).sort(byName);
-  const F = { tous: () => true, freres: p => p.sex === 'H', soeurs: p => p.sex === 'F', eleves: p => p.student, anciens: p => p.privilege === 'ancien' || p.privilege === 'assistant' };
+  const F = { tous: () => true, freres: p => p.sex === 'H', soeurs: p => p.sex === 'F', anciens: p => ['ancien', 'assistant'].includes(statutOf(p)),
+    baptises: p => ['ancien', 'assistant', 'baptise'].includes(statutOf(p)), nonbaptises: p => statutOf(p) === 'nonbaptise',
+    pionniers: p => !!p.pioneer, eleves: p => p.student || statutOf(p) === 'eleve' };
+  const groups = groupsList();
+  if (UI.peopleGroup && UI.peopleGroup !== 'aucun' && !groups.some(g => g.id === UI.peopleGroup)) UI.peopleGroup = '';
+  const G = p => !UI.peopleGroup || (UI.peopleGroup === 'aucun' ? !groupName(p.group) : p.group === UI.peopleGroup);
   const s = UI.search.trim().toLowerCase();
-  const list = all.filter(F[UI.peopleFilter]).filter(p => !s || (p.name || '').toLowerCase().includes(s));
-  const n = k => all.filter(F[k]).length;
-  let h = `<div class="toolbar"><h1>Proclamateurs et élèves</h1>${all.length ? exportBtn('people') : ''}<button class="btn primary add-desktop" data-act="person-new">${I.plus}Ajouter</button><button class="fab" data-act="person-new" aria-label="Ajouter une personne">${I.plus}</button></div>
-    <div class="filters">${[['tous','Tous'],['freres','Frères'],['soeurs','Sœurs'],['eleves','Élèves'],['anciens','Anciens et assistants']].map(([k, l]) => `<button data-act="pf" data-k="${k}" aria-pressed="${UI.peopleFilter === k}">${l} · ${n(k)}</button>`).join('')}</div>
-    <input type="search" id="p-search" placeholder="Rechercher un nom" value="${esc(UI.search)}" style="margin-bottom:12px">`;
+  const list = all.filter(F[UI.peopleFilter] || F.tous).filter(G).filter(p => !s || (p.name || '').toLowerCase().includes(s));
+  const n = k => all.filter(F[k]).filter(G).length;
+  let h = `<div class="toolbar"><h1>Proclamateurs et élèves</h1><button class="btn" data-act="groups">${I.users}Groupes</button>${all.length ? exportBtn('people') : ''}<button class="btn primary add-desktop" data-act="person-new">${I.plus}Ajouter</button><button class="fab" data-act="person-new" aria-label="Ajouter une personne">${I.plus}</button></div>
+    <div class="filters">${[['tous','Tous'],['freres','Frères'],['soeurs','Sœurs'],['anciens','Anciens et assistants'],['baptises','Baptisés'],['nonbaptises','Non baptisés'],['pionniers','Pionniers'],['eleves','Élèves']].map(([k, l]) => `<button data-act="pf" data-k="${k}" aria-pressed="${UI.peopleFilter === k}">${l} · ${n(k)}</button>`).join('')}</div>
+    <div class="row" style="margin-bottom:12px;flex-wrap:nowrap"><input type="search" id="p-search" placeholder="Rechercher un nom" value="${esc(UI.search)}" style="flex:1">
+      ${groups.length ? `<select id="p-group" style="width:auto;max-width:45%" aria-label="Filtrer par groupe"><option value="">Tous les groupes</option>${groups.map(g => `<option value="${esc(g.id)}"${UI.peopleGroup === g.id ? ' selected' : ''}>${esc(g.name)}</option>`).join('')}<option value="aucun"${UI.peopleGroup === 'aucun' ? ' selected' : ''}>Sans groupe</option></select>` : ''}</div>`;
   if (!all.length) return h + `<div class="card empty"><h2>La liste est vide</h2><p>Ajoutez les proclamateurs et les élèves inscrits à l’école, avec ce que chacun peut recevoir comme attribution (prière, lecture, exposés…). Ils apparaîtront ensuite dans les menus du programme.</p><button class="btn primary" data-act="person-new">${I.plus}Ajouter une personne</button></div>`;
   h += `<div class="count">${list.length} personne${list.length > 1 ? 's' : ''}</div><div class="card"><ul class="list">`;
   const ref = iso(today);
@@ -878,24 +917,32 @@ function viewPeople(){
   return h + '</ul></div>';
 }
 function suggestQuals(p){
-  const q = new Set(['ministere']);
-  if (p.sex === 'H') { q.add('lecture'); if (p.baptized !== false) { q.add('priere'); q.add('lecteur'); } }
-  if (p.privilege) ['priere','joyaux','perles','vie','lecteur','presidentWE','orateur'].forEach(x => q.add(x));
-  if (p.privilege === 'ancien') ['president','etude','conducteurTG'].forEach(x => q.add(x));
-  if (p.privilege) q.delete('ministere');
+  const s = p.statut, h = p.sex === 'H', q = new Set();
+  if (s !== 'ancien' && s !== 'assistant') q.add('ministere');
+  if (h) { q.add('lecture'); if (s !== 'nonbaptise' && s !== 'eleve') ['priere', 'lecteur', 'sono', 'micro', 'accueil', 'estrade'].forEach(x => q.add(x)); }
+  if (h && (s === 'ancien' || s === 'assistant')) ['priere', 'joyaux', 'perles', 'vie', 'lecteur', 'presidentWE', 'orateur', 'sono', 'micro', 'accueil', 'estrade'].forEach(x => q.add(x));
+  if (h && s === 'ancien') ['president', 'etude', 'conducteurTG'].forEach(x => q.add(x));
+  if (s === 'ancien' || s === 'assistant') q.delete('lecture');
   return [...q];
 }
+function statutOptions(sex, sel){
+  return STATUTS.filter(s => sex !== 'F' || (s !== 'ancien' && s !== 'assistant'))
+    .map(s => `<option value="${s}"${s === sel ? ' selected' : ''}>${statutLabel(s, sex)}</option>`).join('');
+}
 function personDialog(id){
-  const p = id ? S.people[id] : { name: '', sex: 'H', baptized: true, privilege: '', student: true, quals: suggestQuals({ sex: 'H', baptized: true }), phone: '', notes: '' };
+  const p = id ? S.people[id] : { name: '', sex: 'H', statut: 'baptise', student: true, quals: suggestQuals({ sex: 'H', statut: 'baptise' }), phone: '', notes: '' };
+  const st = statutOf(p), groups = groupsList();
   const d = $('#dlg');
   d.innerHTML = `<form method="dialog" id="pform"><div class="dlg-h"><h2>${id ? 'Modifier' : 'Ajouter une personne'}</h2><button class="icon-btn" value="cancel" aria-label="Fermer">${I.x}</button></div>
     <div class="dlg-b">
       ${fld('Nom complet', `<input type="text" id="pf-name" value="${esc(p.name)}" autocomplete="off">`, 'wide')}
       ${fld('Frère ou sœur', `<select id="pf-sex"><option value="H"${p.sex === 'H' ? ' selected' : ''}>Frère</option><option value="F"${p.sex === 'F' ? ' selected' : ''}>Sœur</option></select>`)}
-      ${fld('Statut', `<select id="pf-bap"><option value="1"${p.baptized !== false ? ' selected' : ''}>Proclamateur baptisé</option><option value="0"${p.baptized === false ? ' selected' : ''}>Proclamateur non baptisé</option></select>`)}
-      ${fld('Privilège', `<select id="pf-priv"><option value="">Aucun</option><option value="assistant"${p.privilege === 'assistant' ? ' selected' : ''}>Assistant ministériel</option><option value="ancien"${p.privilege === 'ancien' ? ' selected' : ''}>Ancien</option></select>`)}
+      ${fld('Désignation', `<select id="pf-statut">${statutOptions(p.sex, st)}</select>`)}
+      ${fld('Service de pionnier', `<select id="pf-pion"><option value="">Aucun</option>${['auxiliaire', 'permanent', 'special'].map(v => `<option value="${v}"${p.pioneer === v ? ' selected' : ''}>${pioneerLabel(v, p.sex)}</option>`).join('')}</select>`)}
+      ${fld('Groupe de prédication', `<select id="pf-group"><option value="">${groups.length ? 'Aucun groupe' : 'Aucun groupe créé'}</option>${groups.map(g => `<option value="${esc(g.id)}"${p.group === g.id ? ' selected' : ''}>${esc(g.name)}</option>`).join('')}</select>`)}
       ${fld('Téléphone', `<input type="tel" id="pf-phone" value="${esc(p.phone)}">`)}
-      <label class="toggle wide"><input type="checkbox" id="pf-student"${p.student ? ' checked' : ''}> Inscrit à l’école (élève)</label>
+      ${fld('Adresse Gmail (pour « Mes attributions »)', `<input type="email" id="pf-email" value="${esc(p.email)}" placeholder="nom@gmail.com" autocomplete="off">`)}
+      <label class="toggle wide"><input type="checkbox" id="pf-student"${p.student ? ' checked' : ''}> Inscrit à l’école (reçoit des exposés)</label>
       <fieldset class="wide"><legend>Peut recevoir</legend><div class="checks">
         ${QUALS.map(([k, l]) => `<label><input type="checkbox" name="q" value="${k}"${(p.quals || []).includes(k) ? ' checked' : ''}> ${l}</label>`).join('')}</div>
         <button type="button" class="btn sm ghost" id="pf-suggest" style="margin-top:6px">Cocher selon le profil</button></fieldset>
@@ -904,18 +951,62 @@ function personDialog(id){
     <div class="dlg-f">${id ? `<button type="button" class="btn ghost danger" id="pf-del">Supprimer</button>` : ''}<span class="spacer"></span>
       <button class="btn" value="cancel">Annuler</button><button class="btn primary" value="ok" id="pf-ok">Enregistrer</button></div></form>`;
   const f = $('#pform');
-  $('#pf-suggest').onclick = () => { const s = suggestQuals({ sex: $('#pf-sex').value, baptized: $('#pf-bap').value === '1', privilege: $('#pf-priv').value }); f.querySelectorAll('input[name=q]').forEach(c => c.checked = s.includes(c.value)); };
+  $('#pf-suggest').onclick = () => { const s = suggestQuals({ sex: $('#pf-sex').value, statut: $('#pf-statut').value }); f.querySelectorAll('input[name=q]').forEach(c => c.checked = s.includes(c.value)); };
+  // Les libellés suivent frère / sœur ; une sœur ne peut pas être ancien ni assistant
+  $('#pf-sex').onchange = () => {
+    const sx = $('#pf-sex').value, cur = $('#pf-statut').value, pion = $('#pf-pion').value;
+    $('#pf-statut').innerHTML = statutOptions(sx, sx === 'F' && (cur === 'ancien' || cur === 'assistant') ? 'baptise' : cur);
+    $('#pf-pion').innerHTML = `<option value="">Aucun</option>${['auxiliaire', 'permanent', 'special'].map(v => `<option value="${v}"${pion === v ? ' selected' : ''}>${pioneerLabel(v, sx)}</option>`).join('')}`;
+  };
   const del = $('#pf-del'); if (del) del.onclick = () => { const p0 = clone(S.people[id]); removeDoc('people', id); d.close(); toast(`${p0.name} supprimé(e)`, () => restore('people', id, p0)); };
   f.onsubmit = e => {
     if (e.submitter && e.submitter.value === 'cancel') return;
     const name = $('#pf-name').value.trim(); if (!name) { e.preventDefault(); $('#pf-name').focus(); return; }
-    const data = { ...(id ? clone(p) : {}), name, sex: $('#pf-sex').value, baptized: $('#pf-bap').value === '1', privilege: $('#pf-priv').value,
+    const sx = $('#pf-sex').value; let statut = $('#pf-statut').value;
+    if (sx === 'F' && (statut === 'ancien' || statut === 'assistant')) statut = 'baptise';
+    const email = $('#pf-email').value.trim().toLowerCase();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { e.preventDefault(); $('#pf-email').focus(); toast('Adresse Gmail invalide.'); return; }
+    const data = { ...(id ? clone(p) : {}), name, sex: sx, statut,
+      // champs déduits, gardés pour la compatibilité avec les anciennes fiches
+      privilege: statut === 'ancien' || statut === 'assistant' ? statut : '', baptized: statut !== 'nonbaptise' && statut !== 'eleve',
+      pioneer: $('#pf-pion').value, group: $('#pf-group').value, email,
       phone: $('#pf-phone').value.trim(), student: $('#pf-student').checked, notes: $('#pf-notes').value.trim(), quals: [...f.querySelectorAll('input[name=q]:checked')].map(c => c.value) };
     delete data.example;
     const nid = id || uid('p'); S.people[nid] = data; persist('people', nid, data, 0); toast(id ? 'Modifications enregistrées' : `${name} ajouté(e)`);
   };
   d.onclose = () => render();
   d.showModal();
+}
+
+/* ----- Groupes de prédication (rangés dans les réglages de l'assemblée) ----- */
+function groupsDialog(){
+  const d = $('#dlg');
+  const draw = () => {
+    const groups = groupsList(), people = Object.entries(S.people).map(([id, p]) => ({ id, ...p }));
+    const freres = people.filter(p => p.sex === 'H' && ['ancien', 'assistant'].includes(statutOf(p))).sort(byName);
+    const sel = (gid, field, val) => `<select data-g="${esc(gid)}" data-gf="${field}"><option value="">—</option>${freres.map(p => `<option value="${esc(p.id)}"${p.id === val ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}</select>`;
+    d.querySelector('.dlg-b').innerHTML = `
+      <p class="muted wide" style="margin:0;font-size:13px">Créez les groupes de l’assemblée, puis choisissez le groupe de chaque personne dans sa fiche. Le groupe apparaît ensuite partout : liste, menus d’attribution, filtres et exports.</p>
+      ${groups.map(g => { const membres = people.filter(p => p.group === g.id).sort(byName);
+        return `<div class="wide adm-card" style="border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px">
+          <div class="row" style="flex-wrap:nowrap"><input type="text" data-g="${esc(g.id)}" data-gf="name" value="${esc(g.name)}" aria-label="Nom du groupe" style="font-weight:700">
+            <button type="button" class="icon-btn" data-gdel="${esc(g.id)}" aria-label="Supprimer le groupe">${I.x}</button></div>
+          <div class="checks" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">${fld('Surveillant de groupe', sel(g.id, 'overseer', g.overseer))}${fld('Adjoint', sel(g.id, 'assistant', g.assistant))}</div>
+          <div class="muted" style="font-size:13px">${membres.length} membre${membres.length > 1 ? 's' : ''}${membres.length ? ' : ' + membres.map(p => esc(p.name)).join(', ') : ''}</div></div>`; }).join('')}
+      <div class="wide row" style="flex-wrap:nowrap"><input type="text" id="g-new" placeholder="Nom du nouveau groupe (ex. Groupe 1, Cocody…)" autocomplete="off" style="flex:1"><button type="button" class="btn primary" id="g-add">${I.plus}Créer</button></div>`;
+    const save = fn => { setConfig(c => { c.groups = (Array.isArray(c.groups) ? c.groups : []).map(x => ({ ...x })); fn(c.groups); }); };
+    d.querySelector('#g-add').onclick = () => { const name = d.querySelector('#g-new').value.trim(); if (!name) return; save(gs => gs.push({ id: uid('g'), name: name.slice(0, 40) })); draw(); };
+    d.querySelectorAll('[data-gf]').forEach(el => el.onchange = () => { save(gs => { const g = gs.find(x => x.id === el.dataset.g); if (g) g[el.dataset.gf] = el.dataset.gf === 'name' ? (el.value.trim().slice(0, 40) || g.name) : el.value; }); draw(); });
+    d.querySelectorAll('[data-gdel]').forEach(b => b.onclick = () => {
+      const gid = b.dataset.gdel, before = clone(S.config.groups);
+      save(gs => gs.splice(gs.findIndex(x => x.id === gid), 1)); draw();
+      toast('Groupe supprimé (les personnes restent, sans groupe)', () => setConfig(c => { c.groups = before; }));
+    });
+  };
+  d.innerHTML = `<form method="dialog"><div class="dlg-h"><h2>Groupes de prédication</h2><button class="icon-btn" value="x" aria-label="Fermer">${I.x}</button></div>
+    <div class="dlg-b"></div><div class="dlg-f"><span class="spacer"></span><button class="btn primary" value="x">Terminé</button></div></form>`;
+  draw();
+  d.onclose = () => render(); d.showModal();
 }
 
 /* ----- Orateurs ----- */
@@ -1054,6 +1145,7 @@ main.addEventListener('click', e => {
     case 'timer-we': openTimer(`Réunion du week-end · ${fmtLong(parseD(b.dataset.d))}`, weItems(b.dataset.d)); return;
     case 'pf': UI.peopleFilter = b.dataset.k; break;
     case 'person-new': personDialog(null); return;
+    case 'groups': groupsDialog(); return;
     case 'person-edit': personDialog(b.dataset.id); return;
     case 'sp-new': speakerDialog(null); return;
     case 'sp-edit': speakerDialog(b.dataset.id); return;
@@ -1068,6 +1160,14 @@ function applyField(el, rerender){
   const f = el.dataset.f; if (!f) return;
   if (el.id === 'we-start') return;
   let v = el.value;
+  if (el.dataset.duty) { // tâches de la réunion (semaine ou week-end)
+    const k = el.dataset.duty;
+    if (!DUTIES.some(x => x[0] === k)) return;
+    const setDuty = w => { w.duties = { ...(w.duties || {}) }; if (v) w.duties[k] = v; else delete w.duties[k]; };
+    if (el.dataset.we) edit('weekend', el.dataset.we, setDuty, 0);
+    else if (S.midweek[UI.week]) edit('midweek', UI.week, setDuty, 0);
+    return;
+  }
   if (el.dataset.we) {
     const d = el.dataset.we;
     edit('weekend', d, w => {
@@ -1088,6 +1188,7 @@ function applyField(el, rerender){
 }
 main.addEventListener('input', e => { if (e.target.matches('input[type=text],input[type=number],textarea')) applyField(e.target, false); if (e.target.id === 'p-search') { UI.search = e.target.value; const pos = e.target.selectionStart; render(); const s = $('#p-search'); s.focus(); s.setSelectionRange(pos, pos); } });
 main.addEventListener('change', e => {
+  if (e.target.id === 'p-group') { UI.peopleGroup = e.target.value; render(); return; }
   if (e.target.classList.contains('cal-pick')) { if (e.target.value) { const k = iso(monday(parseD(e.target.value))); UI.anim = k > UI.week ? 1 : -1; UI.week = k; render(); } return; }
   if (e.target.id === 'we-start') { if (e.target.value) { UI.weStart = e.target.value; lsSet('vcm-we-start', UI.weStart); } render(); return; }
   if (e.target.matches('select')) { applyField(e.target, true); render(); }
@@ -1223,6 +1324,8 @@ function reportWeek(nWeeks){
       rows.push({ sec: 'neutral', text: 'CONCLUSION' });
       line('Conclusion', '', 'Paroles de conclusion', 3, P(w.chairman), '');
       line('Conclusion', '', `Cantique ${w.songClose || '…'} et prière`, 5, P(w.prayerClose), '');
+      const dt = DUTIES.filter(([k]) => (w.duties || {})[k]);
+      if (dt.length) { rows.push({ sec: 'neutral', text: 'TÂCHES DE LA RÉUNION' }); dt.forEach(([k, l]) => line('Tâches', '', l, 0, P(w.duties[k]), '')); }
     }
     blocks.push({ heading: `Semaine du ${weekLabel(k)}${w.label ? ' · ' + w.label : ''}`, sub: `${fmtLong(md)} à ${S.config.midweekTime} · Président : ${P(w.chairman)}${aux && w.auxCounselor ? ' · Conseiller classe aux. : ' + P(w.auxCounselor) : ''}`, head, rows });
   }
@@ -1237,15 +1340,26 @@ function reportWeekend(){
     return [fmtLong(parseD(d)), w.talkNo || '', [w.theme, ev].filter(Boolean).join(' · '), w.speaker || '', w.speakerCong || '', P(w.chairman), P(w.conductor), P(w.reader), P(w.prayer)]; });
   const [y, m] = UI.weStart.split('-').map(Number), endM = new Date(y, m - 2 + UI.weMonths, 1);
   const period = `${cap(MOIS[m - 1])} ${y} à ${MOIS[endM.getMonth()]} ${endM.getFullYear()}`;
-  return { title: 'Discours publics et réunion du week-end', period, file: `Planning week-end ${period}`, landscape: true, empty: !rows.length,
-    blocks: [{ head, rows }], sheets: [{ name: 'Week-end', head, rows }] };
+  const headD = ['Date', ...DUTIES.map(x => x[1])];
+  const rowsD = weDates().filter(d => S.weekend[d] && Object.keys(S.weekend[d].duties || {}).length)
+    .map(d => [fmtLong(parseD(d)), ...DUTIES.map(([k]) => P((S.weekend[d].duties || {})[k]))]);
+  const blocks = [{ head, rows }], sheets = [{ name: 'Week-end', head, rows }];
+  if (rowsD.length) { blocks.push({ heading: 'Tâches de la réunion', sub: '', head: headD, rows: rowsD }); sheets.push({ name: 'Tâches', head: headD, rows: rowsD }); }
+  return { title: 'Discours publics et réunion du week-end', period, file: `Planning week-end ${period}`, landscape: true, empty: !rows.length, blocks, sheets };
 }
 function reportPeople(){
-  const head = ['Nom', 'Frère / sœur', 'Statut', 'Privilège', 'Élève', 'Téléphone', 'Peut recevoir', 'Dernière attribution'];
+  const head = ['Nom', 'Frère / sœur', 'Désignation', 'Pionnier', 'Groupe', 'École', 'Téléphone', 'Peut recevoir', 'Dernière attribution'];
   const ql = Object.fromEntries(QUALS);
-  const rows = Object.entries(S.people).map(([id, p]) => ({ id, ...p })).sort(byName).map(p => { const l = lastBefore(p.id, '9999-12-31');
-    return [p.name, p.sex === 'F' ? 'Sœur' : 'Frère', p.baptized === false ? 'Non baptisé' : 'Baptisé', p.privilege === 'ancien' ? 'Ancien' : p.privilege === 'assistant' ? 'Assistant ministériel' : '', p.student ? 'Oui' : '', p.phone || '', (p.quals || []).map(q => ql[q]).join(', '), l ? fmtD(parseD(l)) + ' ' + l.slice(0, 4) : '']; });
-  return { title: 'Proclamateurs et élèves', period: `${rows.length} personnes`, file: 'Proclamateurs et eleves', landscape: true, empty: !rows.length, blocks: [{ head, rows }], sheets: [{ name: 'Proclamateurs', head, rows }] };
+  const people = Object.entries(S.people).map(([id, p]) => ({ id, ...p })).sort(byName);
+  const row = p => { const l = lastBefore(p.id, '9999-12-31');
+    return [p.name, p.sex === 'F' ? 'Sœur' : 'Frère', statutLabel(statutOf(p), p.sex), pioneerLabel(p.pioneer, p.sex), groupName(p.group), p.student ? 'Oui' : '', p.phone || '', (p.quals || []).map(q => ql[q]).join(', '), l ? fmtD(parseD(l)) + ' ' + l.slice(0, 4) : '']; };
+  const rows = people.map(row);
+  // PDF : un tableau par groupe, avec son surveillant
+  const groups = groupsList(), blocks = [];
+  for (const g of groups) { const m = people.filter(p => p.group === g.id); if (m.length) blocks.push({ heading: g.name, sub: [g.overseer && 'Surveillant : ' + pname(g.overseer), g.assistant && 'Adjoint : ' + pname(g.assistant), m.length + ' personne(s)'].filter(Boolean).join(' · '), head, rows: m.map(row) }); }
+  const sans = people.filter(p => !groupName(p.group));
+  if (sans.length) blocks.push({ heading: groups.length ? 'Sans groupe' : '', sub: '', head, rows: sans.map(row) });
+  return { title: 'Proclamateurs et élèves', period: `${rows.length} personnes`, file: 'Proclamateurs et eleves', landscape: true, empty: !rows.length, blocks, sheets: [{ name: 'Proclamateurs', head, rows }] };
 }
 function reportSpeakers(){
   const head = ['Nom', 'Assemblée', 'Téléphone', 'Discours présentés', 'Prochaine visite'];
@@ -1373,8 +1487,10 @@ function buildMessages(map, when){
     return { pid, name, phone: p.phone || '', text };
   }).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
 }
-function weekMessages(key){
+/* Attributions d'une réunion, regroupées par personne : { idPersonne: [lignes] } */
+function weekLines(key){
   const w = S.midweek[key], map = {}, P = id => pname(id) || 'à préciser';
+  if (!w || w.event === 'assemblee') return map;
   const push = (pid, l) => { if (pid) (map[pid] || (map[pid] = [])).push(l); };
   push(w.chairman, 'Président de la réunion'); push(w.prayerOpen, `Prière d’ouverture (après le cantique ${w.songOpen || ''})`.replace(' )', ')'));
   push(w.prayerClose, 'Prière de fin'); if (S.config.aux) push(w.auxCounselor, 'Conseiller de la classe auxiliaire');
@@ -1387,15 +1503,39 @@ function weekMessages(key){
       room(p.a, p.b, ''); if (S.config.aux) room(p.auxA, p.auxB, ' — classe auxiliaire');
     } else push(p.a, t);
   }
-  const md = meetingDate(key);
-  return buildMessages(map, `${JOURS[md.getDay()]} ${fmtD(md)} ${md.getFullYear()} à ${S.config.midweekTime}`);
+  DUTIES.forEach(([k, l]) => push((w.duties || {})[k], l));
+  return map;
 }
-function weekendMessages(d){
+function weekMessages(key){
+  const md = meetingDate(key);
+  return buildMessages(weekLines(key), `${JOURS[md.getDay()]} ${fmtD(md)} ${md.getFullYear()} à ${S.config.midweekTime}`);
+}
+function weekendLines(d){
   const w = S.weekend[d], map = {}, push = (pid, l) => { if (pid) (map[pid] || (map[pid] = [])).push(l); };
+  if (!w || w.event === 'assemblee') return map;
   push(w.chairman, 'Président de la réunion'); push(w.conductor, 'Conducteur de l’étude de La Tour de Garde');
   push(w.reader, 'Lecteur de La Tour de Garde'); push(w.prayer, 'Prière de fin');
+  DUTIES.forEach(([k, l]) => push((w.duties || {})[k], l));
+  return map;
+}
+function weekendMessages(d){
   const dt = parseD(d);
-  return buildMessages(map, `${JOURS[dt.getDay()]} ${fmtD(dt)} ${dt.getFullYear()} à ${S.config.weekendTime}`);
+  return buildMessages(weekendLines(d), `${JOURS[dt.getDay()]} ${fmtD(dt)} ${dt.getFullYear()} à ${S.config.weekendTime}`);
+}
+/* « Mes attributions » : la personne dont l'adresse Gmail correspond au compte connecté */
+function myUpcoming(){
+  const email = String(window.CURRENT_EMAIL || '').toLowerCase(); if (!email) return null;
+  const pid = Object.keys(S.people).find(id => String(S.people[id].email || '').toLowerCase() === email); if (!pid) return null;
+  const out = [], from = iso(monday(today));
+  Object.keys(S.midweek).filter(k => k >= from).forEach(k => { const l = weekLines(k)[pid]; if (l) out.push({ date: iso(meetingDate(k)), when: meetingDate(k), lines: l, key: k }); });
+  Object.keys(S.weekend).filter(d => d >= iso(today)).forEach(d => { const l = weekendLines(d)[pid]; if (l) out.push({ date: d, when: parseD(d), lines: l, we: true }); });
+  out.sort((a, b) => a.date.localeCompare(b.date));
+  return { pid, items: out.filter(x => x.date >= iso(today)).slice(0, 4) };
+}
+function mineCard(){
+  const m = myUpcoming(); if (!m) return '';
+  const p = S.people[m.pid];
+  return `<section class="card mine"><h2>Mes attributions · ${esc(p.name)}</h2>${m.items.length ? `<ul>${m.items.map(x => `<li><span class="when">${cap(JOURS[x.when.getDay()]).slice(0, 3)}. ${fmtD(x.when)}</span><span class="what">${x.lines.map(esc).join('<br>')}<span class="muted"> · ${x.we ? 'week-end' : 'semaine'}</span></span></li>`).join('')}</ul>` : '<p class="muted" style="margin:0">Aucune attribution prévue pour le moment.</p>'}</section>`;
 }
 async function copyFrom(btn, text, ta){
   try { await navigator.clipboard.writeText(text); const o = btn.innerHTML; btn.textContent = 'Copié ✓'; setTimeout(() => btn.innerHTML = o, 1600); }
